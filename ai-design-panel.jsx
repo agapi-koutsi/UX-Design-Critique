@@ -409,10 +409,10 @@ const STYLES = `  :root{
 const PERSONAS = [
   {
     key: "pm",
-    name: "Priya Nandan",
+    name: "the Project Manager",
     role: "Project Manager",
     prompt: () =>
-      "You are Priya Nandan, a pragmatic senior Product Manager reviewing a UI design (the attached image) before it goes to engineering. " +
+      "You are the Project Manager, a pragmatic senior Product Manager reviewing a UI design (the attached image) before it goes to engineering. " +
       "Judge it strictly from a product and business lens: does it serve a clear user goal, is the scope right, what's missing or unnecessary, what would you cut or add, how would you know it worked. " +
       "Be specific to what you actually see in the image, not generic advice. " +
       "Reply with ONLY a JSON object, no other text, matching exactly:\n" +
@@ -423,10 +423,10 @@ const PERSONAS = [
   },
   {
     key: "eng",
-    name: "Devon Okafor",
+    name: "the Engineer",
     role: "Engineer",
     prompt: () =>
-      "You are Devon Okafor, a senior software engineer reviewing a UI design (the attached image) that you would have to build. " +
+      "You are the Engineer, a senior software engineer reviewing a UI design (the attached image) that you would have to build. " +
       "Judge it strictly from a technical/feasibility lens: implementation complexity, edge cases and empty/error states, data the screen implies, performance or accessibility concerns, and anything ambiguous you'd need clarified before estimating it. " +
       "Be specific to what you actually see in the image, not generic advice. " +
       "Reply with ONLY a JSON object, no other text, matching exactly:\n" +
@@ -437,10 +437,10 @@ const PERSONAS = [
   },
   {
     key: "skeptic",
-    name: "Mara Lindqvist",
+    name: "the User",
     role: "User",
     prompt: () =>
-      "You are Mara Lindqvist, a skeptical, impatient first-time user looking at a UI design (the attached image), not a professional designer. " +
+      "You are the user, a skeptical, impatient first-time user looking at a UI design (the attached image), not a professional designer. " +
       "Judge it strictly from that lens: what would confuse you, where would you hesitate or not trust it, what jargon or assumptions annoy you, would you actually bother using this. " +
       "Be specific to what you actually see in the image, not generic advice. " +
       "Reply with ONLY a JSON object, no other text, matching exactly:\n" +
@@ -467,17 +467,17 @@ const STANCE_META = {
 
 function round2Prompt(pmData) {
   return (
-    "You are Devon Okafor, a senior software engineer. You already reviewed a UI design (the attached image) independently. " +
-    "Now you've been shown a fellow reviewer's critique of the SAME design — the Product Manager, Priya Nandan. Read her critique below and react to it directly, from your own engineering standpoint. " +
+    "You are the Engineer, a senior software engineer. You already reviewed a UI design (the attached image) independently. " +
+    "Now you've been shown a fellow reviewer's critique of the SAME design — the Product Manager. Read her critique below and react to it directly, from your own engineering standpoint. " +
     "Say plainly what you agree with, what you'd push back on or find unrealistic, and anything important she missed that you'd want her to know.\n\n" +
-    "PRIYA'S CRITIQUE (verdict: " + pmData.verdict + "):\n" +
+    "PM'S CRITIQUE (verdict: " + pmData.verdict + "):\n" +
     "Headline: " + pmData.headline + "\n" +
     "Strengths she noted: " + (pmData.strengths || []).join("; ") + "\n" +
     "Concerns she raised: " + (pmData.concerns || []).join("; ") + "\n" +
     "Her notes: " + pmData.notes + "\n\n" +
     "Reply with ONLY a JSON object, no other text, matching exactly:\n" +
     '{"stance": "agrees" | "pushes-back" | "adds-nuance", ' +
-    '"reaction": "2-4 sentences in your own voice as Devon, responding specifically to what Priya said, no lists, no markdown"}'
+    '"reaction": "2-4 sentences in your own voice as engineer, responding specifically to what the PM said, no lists, no markdown"}'
   );
 }
 
