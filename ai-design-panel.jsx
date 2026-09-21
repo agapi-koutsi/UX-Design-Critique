@@ -73,6 +73,8 @@ const STYLES = `  :root{
     max-width:1280px;
     margin:0 auto;
     padding:72px 48px 80px;
+    min-height: 100dvh;
+    margin: 0;
   }
   @media (max-width:720px){
     .page{padding:40px 20px 56px;}
