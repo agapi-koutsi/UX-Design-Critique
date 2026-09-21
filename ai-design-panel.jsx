@@ -360,7 +360,7 @@ const STYLES = `  :root{
   .pts li{font-size:14px;line-height:1.5;margin-bottom:6px;padding-left:16px;position:relative;color:var(--ink);}
   .pts li::before{position:absolute;left:0;}
   .pts .strength li::before{content:"+"; color:var(--good); font-weight:700;}
-  .pts .concern li::before{content:"\2013"; color:var(--bad); font-weight:700;}
+  .pts .concern li::before{content:"-"; color:var(--bad); font-weight:700;}
   .notes{
     margin:0; font-size:14.5px; font-style:italic; color:var(--ink-soft);
     border-left:2px solid var(--line-strong); padding-left:14px; line-height:1.6; max-width:64ch;
