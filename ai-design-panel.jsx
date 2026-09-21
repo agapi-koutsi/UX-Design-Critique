@@ -1,31 +1,1457 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-const MARKUP = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">\n<style>\n  :root{\n    --bg:#F4F3EF;\n    --surface:#FFFFFF;\n    --surface-muted:#ECEBE5;\n    --ink:#17161A;\n    --ink-soft:#6B695F;\n    --ink-faint:#96937F;\n    --line:#E3E1D7;\n    --line-strong:#D2CFC0;\n    --accent:#3D53F5;\n    --accent-tint:#E5E8FE;\n    --pm:#A2711A;\n    --pm-tint:#F1E5C9;\n    --eng:#1F7A6C;\n    --eng-tint:#DCEEEA;\n    --skeptic:#A8532B;\n    --skeptic-tint:#F1DFCE;\n    --good:#3D7A49;\n    --good-tint:#E1EEDD;\n    --warn:#B4791A;\n    --warn-tint:#F3E7C8;\n    --bad:#B23A2C;\n    --bad-tint:#F3DDD6;\n    --focus:#3D53F5;\n    --shadow:0 2px 4px rgba(23,22,26,.04), 0 16px 32px -16px rgba(23,22,26,.18);\n  }\n  @media (prefers-color-scheme: dark){\n    :root:not([data-theme="light"]){\n      --bg:#17181A;\n      --surface:#201F23;\n      --surface-muted:#28272B;\n      --ink:#ECE8DE;\n      --ink-soft:#A7A18E;\n      --ink-faint:#726C5C;\n      --line:#37372F;\n      --line-strong:#48473C;\n      --accent:#8791FF;\n      --accent-tint:#262A4A;\n      --pm:#DCAC55;\n      --pm-tint:#332A18;\n      --eng:#5FC0AC;\n      --eng-tint:#1B2E2A;\n      --skeptic:#DE8E60;\n      --skeptic-tint:#332118;\n      --good:#7BC488;\n      --good-tint:#1E2E20;\n      --warn:#E3B15C;\n      --warn-tint:#332811;\n      --bad:#E17E6C;\n      --bad-tint:#332019;\n      --focus:#8791FF;\n      --shadow:0 2px 4px rgba(0,0,0,.4), 0 16px 32px -16px rgba(0,0,0,.6);\n    }\n  }\n  :root[data-theme="dark"]{\n    --bg:#17181A;\n    --surface:#201F23;\n    --surface-muted:#28272B;\n    --ink:#ECE8DE;\n    --ink-soft:#A7A18E;\n    --ink-faint:#726C5C;\n    --line:#37372F;\n    --line-strong:#48473C;\n    --accent:#8791FF;\n    --accent-tint:#262A4A;\n    --pm:#DCAC55;\n    --pm-tint:#332A18;\n    --eng:#5FC0AC;\n    --eng-tint:#1B2E2A;\n    --skeptic:#DE8E60;\n    --skeptic-tint:#332118;\n    --good:#7BC488;\n    --good-tint:#1E2E20;\n    --warn:#E3B15C;\n    --warn-tint:#332811;\n    --bad:#E17E6C;\n    --bad-tint:#332019;\n    --focus:#8791FF;\n    --shadow:0 2px 4px rgba(0,0,0,.4), 0 16px 32px -16px rgba(0,0,0,.6);\n  }\n\n  *{box-sizing:border-box;}\n  html{color-scheme:light dark;}\n  body{\n    margin:0;\n    background-color:var(--bg);\n    background-image:url("https://backgrounds.wetransfer.net/creator/wetransfer/2505/static-big-text/1_L3na97/image.c9511797fe6fcc2ae28d.webp");\n    background-size:cover;\n    background-position:center;\n    background-repeat:no-repeat;\n    background-attachment:fixed;\n    color:var(--ink);\n    font-family:"Public Sans", system-ui, -apple-system, sans-serif;\n    font-size:16px;\n    line-height:1.5;\n    -webkit-font-smoothing:antialiased;\n    position:relative;\n  }\n  body::before{\n    content:"";\n    position:fixed;\n    inset:0;\n    background:rgba(244,243,239,.28);\n    pointer-events:none;\n    z-index:0;\n  }\n  ::selection{background:var(--accent-tint);}\n  a{color:inherit;}\n  button{font-family:inherit;}\n  select{font-family:inherit;}\n  button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focus-visible{\n    outline:2px solid var(--focus);\n    outline-offset:2px;\n  }\n  @media (prefers-reduced-motion: reduce){\n    *{animation-duration:.001ms !important; transition-duration:.001ms !important;}\n  }\n\n  .page{\n    position:relative;\n    z-index:1;\n    max-width:1280px;\n    margin:0 auto;\n    padding:72px 48px 80px;\n  }\n  @media (max-width:720px){\n    .page{padding:40px 20px 56px;}\n  }\n\n  .layout{\n    display:grid;\n    grid-template-columns:minmax(300px,380px) 1fr;\n    gap:72px;\n    align-items:start;\n  }\n  .layout.layout--empty{\n    grid-template-columns:minmax(300px,380px);\n  }\n  .layout.layout--empty .right-col{display:none;}\n  @media (max-width:860px){\n    .layout, .layout.layout--empty{grid-template-columns:1fr; gap:36px;}\n    .layout.layout--empty .right-col{display:none;}\n  }\n\n  /* ---------- Left column ---------- */\n  .left-col{display:flex;flex-direction:column;gap:36px;}\n  h1{\n    font-family:"Lora", Georgia, serif;\n    font-weight:700;\n    font-size:clamp(34px,3.6vw,42px);\n    line-height:1.08;\n    letter-spacing:-0.02em;\n    margin:0;\n    text-wrap:balance;\n  }\n  .tagline{\n    margin:12px 0 0;\n    max-width:42ch;\n    color:var(--ink-soft);\n    font-size:14.5px;\n    line-height:1.55;\n  }\n\n  .upload-card{\n    background:var(--surface);\n    border-radius:24px;\n    box-shadow:0 1px 2px rgba(23,22,26,.04), 0 18px 40px -20px rgba(23,22,26,.18);\n    overflow:hidden;\n  }\n  .upload-card-inner{padding:22px 22px 22px;}\n  .upload-head{margin:0 0 14px;}\n  .upload-title{margin:0;font-weight:700;font-size:15px;}\n  .upload-sub{margin:4px 0 0;font-size:13px;color:var(--ink-soft);font-weight:400;}\n\n  .dropzone{\n    border:1.5px dashed var(--line-strong);\n    border-radius:14px;\n    padding:26px 16px;\n    display:flex;\n    flex-direction:column;\n    align-items:center;\n    justify-content:center;\n    text-align:center;\n    gap:10px;\n    cursor:pointer;\n    transition:border-color .15s ease, background .15s ease;\n    min-height:150px;\n  }\n  .dropzone:hover, .dropzone.drag{\n    border-color:var(--accent);\n    background:var(--accent-tint);\n  }\n  .dz-icon{color:var(--ink-faint);}\n  .dz-icon svg{width:22px;height:22px;}\n  .dz-line1{margin:0;font-size:14px;color:var(--ink);}\n  .dz-line2{margin:0;font-size:13px;color:var(--ink-faint);line-height:1.55;}\n  .dz-browse{color:#3D53F5;text-decoration:underline;font-weight:500;cursor:pointer;text-underline-offset:2px;}\n\n  .hint{\n    display:none;\n    margin:10px 2px 0;\n    font-size:12.5px;\n    color:var(--ink-faint);\n    text-align:center;\n  }\n  .hint.error{display:block;color:var(--bad);}\n\n  .banner{\n    background:var(--warn-tint);\n    border:1px solid var(--warn);\n    color:var(--ink);\n    border-radius:12px;\n    padding:12px 16px;\n    font-size:14px;\n    margin-bottom:20px;\n  }\n\n  /* ---------- design list ---------- */\n  .design-list{background:#EEF0F5;}\n  .design-row{\n    display:flex;\n    align-items:center;\n    gap:12px;\n    padding:16px 22px;\n    background:transparent;\n    cursor:pointer;\n    text-align:left;\n  }\n  .design-row.active{background:transparent;}\n  .design-thumb{\n    flex:none;\n    width:44px;height:44px;\n    border-radius:8px;\n    object-fit:cover;\n    border:none;\n    background:#fff;\n  }\n  .design-meta{flex:1;min-width:0;}\n  .design-name{margin:0;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}\n  .design-row.active .design-name{color:var(--ink);}\n  .design-sub{margin:2px 0 0;font-size:12px;color:var(--ink-faint);}\n  .design-remove{\n    flex:none;\n    background:none;\n    border:none;\n    color:var(--ink-faint);\n    font-size:17px;\n    line-height:1;\n    cursor:pointer;\n    padding:5px 7px;\n    border-radius:6px;\n    opacity:0;\n  }\n  .design-row:hover .design-remove, .design-remove:focus-visible{opacity:1;}\n  .design-remove:hover{color:var(--bad); background:var(--bad-tint);}\n\n  /* ---------- Right column ---------- */\n  .right-col{display:flex;flex-direction:column;gap:28px;padding-top:6px;}\n  .tabs{\n    display:inline-flex;\n    align-items:center;\n    gap:2px;\n    flex-wrap:wrap;\n    padding:5px;\n    background:var(--surface);\n    border-radius:999px;\n    box-shadow:0 1px 2px rgba(23,22,26,.04), 0 10px 24px -16px rgba(23,22,26,.18);\n    width:fit-content;\n  }\n  .tab{\n    background:none;\n    border:none;\n    padding:8px 16px;\n    font-size:14px;\n    font-weight:500;\n    color:var(--ink-soft);\n    cursor:pointer;\n    border-radius:999px;\n    white-space:nowrap;\n  }\n  .tab:hover{color:var(--ink);}\n  .tab.active{\n    background:#2B2A2E;\n    color:#fff;\n    font-weight:500;\n  }\n\n  .content-card{\n    background:transparent;\n    border-radius:0;\n    box-shadow:none;\n    padding:8px 4px 24px;\n    min-height:0;\n  }\n  @media (max-width:600px){\n    .content-card{padding:4px 0 24px;}\n  }\n\n  .panel-title{\n    font-family:"Lora", Georgia, serif;\n    font-weight:700;\n    font-size:28px;\n    margin:0 0 28px;\n    letter-spacing:-0.02em;\n    text-wrap:balance;\n  }\n\n  .empty-state{\n    color:var(--ink-faint);\n    font-size:14.5px;\n    padding:20px 0 4px;\n    max-width:52ch;\n  }\n\n  /* progress list */\n  .progress-list{\n    list-style:none;\n    margin:0;padding:0;\n    display:flex;flex-direction:column;gap:12px;\n    max-width:420px;\n  }\n  .progress-list li{display:flex;align-items:center;gap:10px;font-size:14.5px;}\n  .prog-icon{\n    flex:none;width:20px;height:20px;border-radius:50%;\n    border:1.5px solid var(--line-strong);\n    display:flex;align-items:center;justify-content:center;font-size:11px;\n  }\n  .prog-icon.done{border-color:var(--good); color:var(--good); background:var(--good-tint);}\n  .prog-icon.err{border-color:var(--bad); color:var(--bad); background:var(--bad-tint);}\n  .prog-icon.spin{border-color:var(--accent); border-top-color:transparent; animation:spin .8s linear infinite;}\n  @keyframes spin{to{transform:rotate(360deg);}}\n  .prog-name{font-weight:600;}\n  .prog-status{color:var(--ink-faint); margin-left:auto; font-size:12.5px;}\n\n  /* numbered list (summary + compare) */\n  .num-list{display:flex;flex-direction:column;gap:28px;}\n  .num-item{padding:0; border-top:none;}\n  .num-index{font-family:"Lora", Georgia, serif; font-size:15px; color:var(--ink); margin:0 0 8px; font-weight:600;}\n  .num-tag{\n    display:inline-block; font-size:10.5px; font-weight:600; letter-spacing:.04em;\n    text-transform:uppercase; padding:2px 8px; border-radius:999px; margin-right:9px;\n    position:relative; top:-1px;\n  }\n  .num-tag.agreement, .num-tag.improved{background:var(--good-tint); color:var(--good);}\n  .num-tag.tension, .num-tag.regressed{background:var(--bad-tint); color:var(--bad);}\n  .num-tag.unchanged{background:var(--surface-muted); color:var(--ink-soft);}\n  .num-subtitle{margin:0 0 6px;font-weight:700;font-size:16px;}\n  .num-body{margin:0;color:var(--ink);font-size:15px;line-height:1.65;max-width:62ch;}\n  .num-body:empty{display:none;}\n  .num-closing{\n    margin:26px 0 0; padding-top:22px; border-top:1px solid var(--line);\n    font-family:"Lora", Georgia, serif; font-style:italic; font-size:15.5px;\n    line-height:1.6; color:var(--ink-soft); max-width:66ch;\n  }\n  .lead-line{\n    margin:-8px 0 20px; font-size:14.5px; color:var(--ink-soft); font-weight:500;\n  }\n  .regen-row{display:flex;justify-content:flex-end;margin-top:22px;}\n  .regen-row button, .retry-link{\n    background:none; border:1px solid var(--line-strong); border-radius:999px;\n    padding:8px 16px; font-size:13px; cursor:pointer; color:var(--ink-soft);\n  }\n  .regen-row button:hover, .retry-link:hover{border-color:var(--accent); color:var(--accent);}\n  .stale-banner{\n    display:flex;align-items:center;gap:10px;flex-wrap:wrap;\n    background:var(--warn-tint); border:1px solid var(--warn); border-radius:12px;\n    padding:10px 14px; font-size:13.5px; margin-bottom:20px;\n  }\n  .stale-banner button{margin-left:auto;}\n\n  /* persona detail tab */\n  .persona-head{display:flex;align-items:center;gap:12px;margin-bottom:22px;}\n  .avatar{\n    flex:none; width:38px;height:38px; border-radius:50%;\n    display:flex;align-items:center;justify-content:center;\n    font-family:"IBM Plex Mono", monospace; font-size:12px; font-weight:600;\n    color:#fff; background:var(--accent-color);\n  }\n  .persona-name{margin:0;font-weight:700;font-size:15.5px;}\n  .persona-role{margin:1px 0 0;font-size:12.5px;color:var(--ink-soft);}\n  .redo-btn{\n    margin-left:auto; background:none; border:1px solid var(--line-strong); border-radius:999px;\n    width:32px;height:32px; display:flex;align-items:center;justify-content:center;\n    color:var(--ink-soft); cursor:pointer; flex:none;\n  }\n  .redo-btn:hover{border-color:var(--accent-color); color:var(--accent-color);}\n  .redo-btn svg{width:14px;height:14px;}\n\n  .skeleton-line{\n    height:11px;border-radius:6px;margin-bottom:10px;\n    background:linear-gradient(90deg, var(--line) 25%, var(--surface-muted) 50%, var(--line) 75%);\n    background-size:200% 100%;\n    animation:shimmer 1.4s ease-in-out infinite;\n  }\n  @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}\n  .thinking-label{font-size:13.5px;color:var(--ink-faint);font-style:italic;display:block;margin-bottom:14px;}\n\n  .verdict{\n    display:inline-flex; align-items:center; font-family:"IBM Plex Mono", monospace;\n    font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;\n    padding:5px 10px; border-radius:999px; margin-bottom:16px;\n  }\n  .verdict.good{background:var(--good-tint); color:var(--good);}\n  .verdict.warn{background:var(--warn-tint); color:var(--warn);}\n  .verdict.bad{background:var(--bad-tint); color:var(--bad);}\n  .verdict.tiny{font-size:10px; padding:3px 8px; margin-bottom:0;}\n\n  .headline{\n    font-family:"Lora", Georgia, serif; font-weight:600; font-size:20px;\n    margin:0 0 20px; text-wrap:balance;\n  }\n  .pts{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}\n  @media (max-width:520px){.pts{grid-template-columns:1fr;}}\n  .pts-label{margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);}\n  .pts ul{margin:0;padding:0;list-style:none;}\n  .pts li{font-size:14px;line-height:1.5;margin-bottom:6px;padding-left:16px;position:relative;color:var(--ink);}\n  .pts li::before{position:absolute;left:0;}\n  .pts .strength li::before{content:"+"; color:var(--good); font-weight:700;}\n  .pts .concern li::before{content:"\\2013"; color:var(--bad); font-weight:700;}\n  .notes{\n    margin:0; font-size:14.5px; font-style:italic; color:var(--ink-soft);\n    border-left:2px solid var(--line-strong); padding-left:14px; line-height:1.6; max-width:64ch;\n  }\n  .state-error{color:var(--bad); font-size:14px;}\n\n  .round-label{\n    font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;\n    color:var(--ink-faint); margin:0 0 14px;\n  }\n  .round-divider{\n    margin:30px 0 18px; padding-top:26px; border-top:1px solid var(--line);\n    display:flex; align-items:center; gap:10px;\n  }\n  .round-divider .round-label{margin:0;}\n  .round-divider .redo-btn{width:28px;height:28px;}\n  .round-divider .redo-btn svg{width:13px;height:13px;}\n  .cross-link{margin:24px 0 0; font-size:13.5px; color:var(--accent); cursor:pointer; display:inline-block;}\n  .cross-link:hover{text-decoration:underline;}\n\n  /* compare tab */\n  .compare-pickers{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;}\n  @media (max-width:520px){.compare-pickers{grid-template-columns:1fr;}}\n  .compare-pickers select{\n    width:100%; padding:10px 12px; border-radius:9px; border:1px solid var(--line-strong);\n    background:var(--surface); color:var(--ink); font-size:14px; margin-top:4px;\n  }\n  .compare-preview-row{display:flex;align-items:stretch;gap:16px;margin-bottom:26px;flex-wrap:wrap;}\n  @media (max-width:600px){.compare-preview-row{flex-direction:column;}}\n  .compare-card{flex:1;min-width:190px;background:var(--surface-muted);border-radius:14px;padding:16px;}\n  .compare-thumb{width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:12px;background:var(--surface);border:1px solid var(--line);}\n  .compare-name{margin:0 0 10px;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}\n  .compare-chip-row{display:flex;flex-direction:column;gap:6px;}\n  .compare-chip{display:flex;align-items:center;gap:7px;font-size:12.5px;}\n  .compare-chip b{font-family:"IBM Plex Mono", monospace;font-size:10px;color:var(--ink-faint);font-weight:600;min-width:18px;}\n  .compare-arrow{flex:none;align-self:center;color:var(--ink-faint);}\n  .compare-arrow svg{width:24px;height:24px;}\n  @media (max-width:600px){.compare-arrow svg{transform:rotate(90deg);}}\n\n  .foot{\n    margin-top:56px; padding-top:0; border-top:none;\n    color:var(--ink-faint); font-size:12.5px; position:relative; z-index:1;\n    max-width:380px;\n  }\n  .foot p{margin:0;}\n\n  [hidden]{display:none !important;}\n</style>\n\n<div class="page">\n  <header style="margin-bottom:0;">\n    <div id="capBanner"></div>\n  </header>\n\n  <div class="layout layout--empty">\n    <div class="left-col">\n      <div>\n        <h1>AI Design<br>Critique Panel</h1>\n        <p class="tagline">A multi-agent AI tool that simulates a real design review. Upload a UI screen — Product Manager, Engineer, and Skeptical User agents critique it independently, then a Moderator summarizes the debate. Upload a revised design afterward to compare before/after and see how the feedback was addressed.</p>\n      </div>\n\n      <div class="upload-card">\n        <div class="upload-card-inner">\n          <div class="upload-head">\n            <p class="upload-title">Upload a design</p>\n            <p class="upload-sub">Drag and drop your design here or click to browse</p>\n          </div>\n          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload design images to review">\n            <input type="file" id="fileInput" accept="image/*" multiple hidden>\n            <div class="dz-icon" aria-hidden="true">\n              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V5"/><path d="M8 9l4-4 4 4"/><path d="M5 19h14"/></svg>\n            </div>\n            <p class="dz-line1">Drag and drop here</p>\n            <p class="dz-line2">or<br><span class="dz-browse" id="browseLink">Browse file to upload</span></p>\n          </div>\n          <p class="hint" id="runHint">Upload a design to begin.</p>\n        </div>\n        <div class="design-list" id="designList" hidden></div>\n      </div>\n    </div>\n\n    <div class="right-col">\n      <nav class="tabs" role="tablist">\n        <button class="tab" data-tab="pm" role="tab" aria-selected="false">Project Manager</button>\n        <button class="tab" data-tab="eng" role="tab" aria-selected="false">Engineer</button>\n        <button class="tab" data-tab="skeptic" role="tab" aria-selected="false">User</button>\n        <button class="tab active" data-tab="summary" role="tab" aria-selected="true">Moderator</button>\n        <button class="tab" data-tab="compare" role="tab" aria-selected="false" hidden>Compare</button>\n      </nav>\n      <div class="content-card" id="contentCard"></div>\n    </div>\n  </div>\n\n  <footer class="foot">\n    <p>Each review is generated live, on your own Claude usage, when you upload a design. Nothing you upload is stored by this page.</p>\n  </footer>\n</div>';
+const STYLES = `  :root{
+    --bg:#F6F6F7;
+    --surface:#FFFFFF;
+    --surface-muted:#ECEDEF;
+    --ink:#111111;
+    --ink-soft:#6F6F74;
+    --ink-faint:#9A9AA0;
+    --line:#E6E6E8;
+    --line-strong:#D2D2D6;
+    --accent:#3B5BFF;
+    --accent-tint:#EEF1FF;
+    --pm:#A2711A;
+    --pm-tint:#F1E5C9;
+    --eng:#1F7A6C;
+    --eng-tint:#DCEEEA;
+    --skeptic:#A8532B;
+    --skeptic-tint:#F1DFCE;
+    --good:#3D7A49;
+    --good-tint:#E1EEDD;
+    --warn:#B4791A;
+    --warn-tint:#F3E7C8;
+    --bad:#B23A2C;
+    --bad-tint:#F3DDD6;
+    --focus:#3B5BFF;
+    --shadow:0 1px 2px rgba(17,17,17,.04), 0 12px 28px -18px rgba(17,17,17,.16);
+    --tab-active:#2B2B2E;
+    --file-row:#ECEDEF;
+  }
 
-export default function CritRoom() {
-  const hostRef = useRef(null);
+  *{box-sizing:border-box;}
+  .crit-room{
+    margin:0;
+    background-color:var(--bg);
+    background-image:url("data:image/jpeg;base64,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");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:"Public Sans", system-ui, -apple-system, sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+  }
+  .crit-room::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:rgba(255,255,255,.12);
+    pointer-events:none;
+    z-index:0;
+  }
+  ::selection{background:var(--accent-tint);}
+  a{color:inherit;}
+  button{font-family:inherit;}
+  select{font-family:inherit;}
+  button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focus-visible{
+    outline:2px solid var(--focus);
+    outline-offset:2px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+  }
+
+  .page{
+    position:relative;
+    z-index:1;
+    max-width:1280px;
+    margin:0 auto;
+    padding:72px 48px 80px;
+  }
+  @media (max-width:720px){
+    .page{padding:40px 20px 56px;}
+  }
+
+  .layout{
+    display:grid;
+    grid-template-columns:minmax(300px,380px) 1fr;
+    gap:72px;
+    align-items:start;
+  }
+  .layout.layout--empty{
+    grid-template-columns:minmax(300px,380px);
+  }
+  .layout.layout--empty .right-col{display:none;}
+  @media (max-width:860px){
+    .layout, .layout.layout--empty{grid-template-columns:1fr; gap:36px;}
+    .layout.layout--empty .right-col{display:none;}
+  }
+
+  /* ---------- Left column ---------- */
+  .left-col{display:flex;flex-direction:column;gap:36px;}
+  h1{
+    font-family:"Lora", Georgia, serif;
+    font-weight:700;
+    font-size:clamp(34px,3.6vw,42px);
+    line-height:1.08;
+    letter-spacing:-0.02em;
+    margin:0;
+    text-wrap:balance;
+  }
+
+  .upload-card{
+    background:var(--surface);
+    border-radius:24px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .upload-card-inner{padding:22px 22px 22px;}
+  .upload-head{margin:0 0 14px;}
+  .upload-title{margin:0;font-weight:700;font-size:15px;}
+  .upload-sub{margin:4px 0 0;font-size:13px;color:var(--ink-soft);font-weight:400;}
+
+  .dropzone{
+    border:1.5px dashed var(--line-strong);
+    border-radius:14px;
+    padding:26px 16px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:10px;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+    min-height:150px;
+  }
+  .dropzone:hover, .dropzone.drag{
+    border-color:var(--accent);
+    background:var(--accent-tint);
+  }
+  .dz-icon{color:var(--ink);}
+  .dz-icon svg{width:22px;height:22px;}
+  .dz-line1{margin:0;font-size:14px;color:var(--ink);}
+  .dz-line2{margin:0;font-size:13px;color:var(--ink);line-height:1.55;}
+  .dz-browse{color:var(--accent);text-decoration:underline;font-weight:500;cursor:pointer;text-underline-offset:2px;}
+
+  .hint{
+    display:none;
+    margin:10px 2px 0;
+    font-size:12.5px;
+    color:var(--ink-faint);
+    text-align:center;
+  }
+  .hint.error{display:block;color:var(--bad);}
+
+  .banner{
+    background:var(--warn-tint);
+    border:1px solid var(--warn);
+    color:var(--ink);
+    border-radius:12px;
+    padding:12px 16px;
+    font-size:14px;
+    margin-bottom:20px;
+  }
+
+  /* ---------- design list ---------- */
+  .design-list{background:var(--file-row);}
+  .design-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:16px 22px;
+    background:transparent;
+    cursor:pointer;
+    text-align:left;
+  }
+  .design-row.active{background:transparent;}
+  .design-thumb{
+    flex:none;
+    width:44px;height:44px;
+    border-radius:8px;
+    object-fit:cover;
+    border:none;
+    background:#fff;
+  }
+  .design-meta{flex:1;min-width:0;}
+  .design-name{margin:0;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .design-row.active .design-name{color:var(--ink);}
+  .design-sub{margin:2px 0 0;font-size:12px;color:var(--ink-faint);}
+  .design-remove{
+    flex:none;
+    background:none;
+    border:none;
+    color:var(--ink-faint);
+    font-size:17px;
+    line-height:1;
+    cursor:pointer;
+    padding:5px 7px;
+    border-radius:6px;
+    opacity:0;
+  }
+  .design-row:hover .design-remove, .design-remove:focus-visible{opacity:1;}
+  .design-remove:hover{color:var(--bad); background:var(--bad-tint);}
+
+  /* ---------- Right column ---------- */
+  .right-col{display:flex;flex-direction:column;gap:28px;padding-top:6px;}
+  .tabs{
+    display:inline-flex;
+    align-items:center;
+    gap:2px;
+    flex-wrap:wrap;
+    padding:5px;
+    background:var(--surface);
+    border-radius:999px;
+    box-shadow:var(--shadow);
+    width:fit-content;
+  }
+  .tab{
+    background:none;
+    border:none;
+    padding:8px 16px;
+    font-size:14px;
+    font-weight:500;
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .tab:hover{color:var(--ink);}
+  .tab.active{
+    background:var(--tab-active);
+    color:#fff;
+    font-weight:500;
+  }
+
+  .content-card{
+    background:transparent;
+    border-radius:0;
+    box-shadow:none;
+    padding:8px 4px 24px;
+    min-height:0;
+  }
+  @media (max-width:600px){
+    .content-card{padding:4px 0 24px;}
+  }
+
+  .panel-title{
+    font-family:"Lora", Georgia, serif;
+    font-weight:700;
+    font-size:28px;
+    margin:0 0 28px;
+    letter-spacing:-0.02em;
+    text-wrap:balance;
+  }
+
+  .empty-state{
+    color:var(--ink-faint);
+    font-size:14.5px;
+    padding:20px 0 4px;
+    max-width:52ch;
+  }
+
+  /* progress list */
+  .progress-list{
+    list-style:none;
+    margin:0;padding:0;
+    display:flex;flex-direction:column;gap:12px;
+    max-width:420px;
+  }
+  .progress-list li{display:flex;align-items:center;gap:10px;font-size:14.5px;}
+  .prog-icon{
+    flex:none;width:20px;height:20px;border-radius:50%;
+    border:1.5px solid var(--line-strong);
+    display:flex;align-items:center;justify-content:center;font-size:11px;
+  }
+  .prog-icon.done{border-color:var(--good); color:var(--good); background:var(--good-tint);}
+  .prog-icon.err{border-color:var(--bad); color:var(--bad); background:var(--bad-tint);}
+  .prog-icon.spin{border-color:var(--accent); border-top-color:transparent; animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .prog-name{font-weight:600;}
+  .prog-status{color:var(--ink-faint); margin-left:auto; font-size:12.5px;}
+
+  /* numbered list (summary + compare) */
+  .num-list{display:flex;flex-direction:column;gap:28px;}
+  .num-item{padding:0; border-top:none;}
+  .num-index{font-family:"Lora", Georgia, serif; font-size:15px; color:var(--ink); margin:0 0 8px; font-weight:600;}
+  .num-tag{
+    display:inline-block; font-size:10.5px; font-weight:600; letter-spacing:.04em;
+    text-transform:uppercase; padding:2px 8px; border-radius:999px; margin-right:9px;
+    position:relative; top:-1px;
+  }
+  .num-tag.agreement, .num-tag.improved{background:var(--good-tint); color:var(--good);}
+  .num-tag.tension, .num-tag.regressed{background:var(--bad-tint); color:var(--bad);}
+  .num-tag.unchanged{background:var(--surface-muted); color:var(--ink-soft);}
+  .num-subtitle{margin:0 0 6px;font-weight:700;font-size:16px;}
+  .num-body{margin:0;color:var(--ink);font-size:15px;line-height:1.65;max-width:62ch;}
+  .num-body:empty{display:none;}
+  .num-closing{
+    margin:26px 0 0; padding-top:22px; border-top:1px solid var(--line);
+    font-family:"Lora", Georgia, serif; font-style:italic; font-size:15.5px;
+    line-height:1.6; color:var(--ink-soft); max-width:66ch;
+  }
+  .lead-line{
+    margin:-8px 0 20px; font-size:14.5px; color:var(--ink-soft); font-weight:500;
+  }
+  .regen-row{display:flex;justify-content:flex-end;margin-top:22px;}
+  .regen-row button, .retry-link{
+    background:none; border:1px solid var(--line-strong); border-radius:999px;
+    padding:8px 16px; font-size:13px; cursor:pointer; color:var(--ink-soft);
+  }
+  .regen-row button:hover, .retry-link:hover{border-color:var(--accent); color:var(--accent);}
+  .stale-banner{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:var(--warn-tint); border:1px solid var(--warn); border-radius:12px;
+    padding:10px 14px; font-size:13.5px; margin-bottom:20px;
+  }
+  .stale-banner button{margin-left:auto;}
+
+  /* persona detail tab */
+  .persona-head{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+  .avatar{
+    flex:none; width:38px;height:38px; border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"IBM Plex Mono", monospace; font-size:12px; font-weight:600;
+    color:#fff; background:var(--accent-color);
+  }
+  .persona-name{margin:0;font-weight:700;font-size:15.5px;}
+  .persona-role{margin:1px 0 0;font-size:12.5px;color:var(--ink-soft);}
+  .redo-btn{
+    margin-left:auto; background:none; border:1px solid var(--line-strong); border-radius:999px;
+    width:32px;height:32px; display:flex;align-items:center;justify-content:center;
+    color:var(--ink-soft); cursor:pointer; flex:none;
+  }
+  .redo-btn:hover{border-color:var(--accent-color); color:var(--accent-color);}
+  .redo-btn svg{width:14px;height:14px;}
+
+  .skeleton-line{
+    height:11px;border-radius:6px;margin-bottom:10px;
+    background:linear-gradient(90deg, var(--line) 25%, var(--surface-muted) 50%, var(--line) 75%);
+    background-size:200% 100%;
+    animation:shimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+  .thinking-label{font-size:13.5px;color:var(--ink-faint);font-style:italic;display:block;margin-bottom:14px;}
+
+  .verdict{
+    display:inline-flex; align-items:center; font-family:"IBM Plex Mono", monospace;
+    font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+    padding:5px 10px; border-radius:999px; margin-bottom:16px;
+  }
+  .verdict.good{background:var(--good-tint); color:var(--good);}
+  .verdict.warn{background:var(--warn-tint); color:var(--warn);}
+  .verdict.bad{background:var(--bad-tint); color:var(--bad);}
+  .verdict.tiny{font-size:10px; padding:3px 8px; margin-bottom:0;}
+
+  .headline{
+    font-family:"Lora", Georgia, serif; font-weight:600; font-size:20px;
+    margin:0 0 20px; text-wrap:balance;
+  }
+  .pts{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+  @media (max-width:520px){.pts{grid-template-columns:1fr;}}
+  .pts-label{margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);}
+  .pts ul{margin:0;padding:0;list-style:none;}
+  .pts li{font-size:14px;line-height:1.5;margin-bottom:6px;padding-left:16px;position:relative;color:var(--ink);}
+  .pts li::before{position:absolute;left:0;}
+  .pts .strength li::before{content:"+"; color:var(--good); font-weight:700;}
+  .pts .concern li::before{content:"\2013"; color:var(--bad); font-weight:700;}
+  .notes{
+    margin:0; font-size:14.5px; font-style:italic; color:var(--ink-soft);
+    border-left:2px solid var(--line-strong); padding-left:14px; line-height:1.6; max-width:64ch;
+  }
+  .state-error{color:var(--bad); font-size:14px;}
+
+  .round-label{
+    font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-faint); margin:0 0 14px;
+  }
+  .round-divider{
+    margin:30px 0 18px; padding-top:26px; border-top:1px solid var(--line);
+    display:flex; align-items:center; gap:10px;
+  }
+  .round-divider .round-label{margin:0;}
+  .round-divider .redo-btn{width:28px;height:28px;}
+  .round-divider .redo-btn svg{width:13px;height:13px;}
+  .cross-link{margin:24px 0 0; font-size:13.5px; color:var(--accent); cursor:pointer; display:inline-block;}
+  .cross-link:hover{text-decoration:underline;}
+
+  /* compare tab */
+  .compare-pickers{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;}
+  @media (max-width:520px){.compare-pickers{grid-template-columns:1fr;}}
+  .compare-pickers select{
+    width:100%; padding:10px 12px; border-radius:9px; border:1px solid var(--line-strong);
+    background:var(--surface); color:var(--ink); font-size:14px; margin-top:4px;
+  }
+  .compare-preview-row{display:flex;align-items:stretch;gap:16px;margin-bottom:26px;flex-wrap:wrap;}
+  @media (max-width:600px){.compare-preview-row{flex-direction:column;}}
+  .compare-card{flex:1;min-width:190px;background:var(--surface-muted);border-radius:14px;padding:16px;}
+  .compare-thumb{width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:12px;background:var(--surface);border:1px solid var(--line);}
+  .compare-name{margin:0 0 10px;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .compare-chip-row{display:flex;flex-direction:column;gap:6px;}
+  .compare-chip{display:flex;align-items:center;gap:7px;font-size:12.5px;}
+  .compare-chip b{font-family:"IBM Plex Mono", monospace;font-size:10px;color:var(--ink-faint);font-weight:600;min-width:18px;}
+  .compare-arrow{flex:none;align-self:center;color:var(--ink-faint);}
+  .compare-arrow svg{width:24px;height:24px;}
+  @media (max-width:600px){.compare-arrow svg{transform:rotate(90deg);}}
+
+  .foot{
+    margin-top:56px; padding-top:0; border-top:none;
+    color:var(--ink-faint); font-size:12.5px; position:relative; z-index:1;
+    max-width:380px;
+  }
+  .foot p{margin:0;}
+
+  [hidden]{display:none !important;}`;
+
+const PERSONAS = [
+  {
+    key: "pm",
+    name: "Priya Nandan",
+    role: "Project Manager",
+    prompt: () =>
+      "You are Priya Nandan, a pragmatic senior Product Manager reviewing a UI design (the attached image) before it goes to engineering. " +
+      "Judge it strictly from a product and business lens: does it serve a clear user goal, is the scope right, what's missing or unnecessary, what would you cut or add, how would you know it worked. " +
+      "Be specific to what you actually see in the image, not generic advice. " +
+      "Reply with ONLY a JSON object, no other text, matching exactly:\n" +
+      '{"verdict": "ship-it" | "needs-work" | "big-concerns", "headline": "one short punchy sentence, your overall take", ' +
+      '"strengths": ["short phrase", "short phrase"], "concerns": ["short phrase", "short phrase"], ' +
+      '"notes": "2-3 sentences in your own voice, plain prose, no lists, no markdown"}\n' +
+      "strengths and concerns should each have 1 to 3 items.",
+  },
+  {
+    key: "eng",
+    name: "Devon Okafor",
+    role: "Engineer",
+    prompt: () =>
+      "You are Devon Okafor, a senior software engineer reviewing a UI design (the attached image) that you would have to build. " +
+      "Judge it strictly from a technical/feasibility lens: implementation complexity, edge cases and empty/error states, data the screen implies, performance or accessibility concerns, and anything ambiguous you'd need clarified before estimating it. " +
+      "Be specific to what you actually see in the image, not generic advice. " +
+      "Reply with ONLY a JSON object, no other text, matching exactly:\n" +
+      '{"verdict": "ship-it" | "needs-work" | "big-concerns", "headline": "one short punchy sentence, your overall take", ' +
+      '"strengths": ["short phrase", "short phrase"], "concerns": ["short phrase", "short phrase"], ' +
+      '"notes": "2-3 sentences in your own voice, plain prose, no lists, no markdown"}\n' +
+      "strengths and concerns should each have 1 to 3 items.",
+  },
+  {
+    key: "skeptic",
+    name: "Mara Lindqvist",
+    role: "User",
+    prompt: () =>
+      "You are Mara Lindqvist, a skeptical, impatient first-time user looking at a UI design (the attached image), not a professional designer. " +
+      "Judge it strictly from that lens: what would confuse you, where would you hesitate or not trust it, what jargon or assumptions annoy you, would you actually bother using this. " +
+      "Be specific to what you actually see in the image, not generic advice. " +
+      "Reply with ONLY a JSON object, no other text, matching exactly:\n" +
+      '{"verdict": "ship-it" | "needs-work" | "big-concerns", "headline": "one short punchy sentence, your overall take", ' +
+      '"strengths": ["short phrase", "short phrase"], "concerns": ["short phrase", "short phrase"], ' +
+      '"notes": "2-3 sentences in your own voice, plain prose, no lists, no markdown"}\n' +
+      "strengths and concerns should each have 1 to 3 items.",
+  },
+];
+
+const PERSONA_BY_KEY = Object.fromEntries(PERSONAS.map((p) => [p.key, p]));
+const TABS = [
+  { id: "pm", label: "Project Manager" },
+  { id: "eng", label: "Engineer" },
+  { id: "skeptic", label: "User" },
+  { id: "summary", label: "Moderator" },
+  { id: "compare", label: "Compare" },
+];
+const STANCE_META = {
+  agrees: { label: "Agrees" },
+  "pushes-back": { label: "Pushes back" },
+  "adds-nuance": { label: "Adds nuance" },
+};
+
+function round2Prompt(pmData) {
+  return (
+    "You are Devon Okafor, a senior software engineer. You already reviewed a UI design (the attached image) independently. " +
+    "Now you've been shown a fellow reviewer's critique of the SAME design — the Product Manager, Priya Nandan. Read her critique below and react to it directly, from your own engineering standpoint. " +
+    "Say plainly what you agree with, what you'd push back on or find unrealistic, and anything important she missed that you'd want her to know.\n\n" +
+    "PRIYA'S CRITIQUE (verdict: " + pmData.verdict + "):\n" +
+    "Headline: " + pmData.headline + "\n" +
+    "Strengths she noted: " + (pmData.strengths || []).join("; ") + "\n" +
+    "Concerns she raised: " + (pmData.concerns || []).join("; ") + "\n" +
+    "Her notes: " + pmData.notes + "\n\n" +
+    "Reply with ONLY a JSON object, no other text, matching exactly:\n" +
+    '{"stance": "agrees" | "pushes-back" | "adds-nuance", ' +
+    '"reaction": "2-4 sentences in your own voice as Devon, responding specifically to what Priya said, no lists, no markdown"}'
+  );
+}
+
+function mapError(err) {
+  const code = (err && err.code) || "upstream_error";
+  const map = {
+    not_granted: "You declined (or your organization has not allowed) Claude access for this page.",
+    sampling_disabled: "Claude isn't available for this account right now.",
+    not_declared: "This page's Claude access isn't set up correctly.",
+    capability_disabled: "Claude access isn't usable in this view.",
+    capability_removed: "This viewer doesn't support that call.",
+    images_unavailable: "This view can't send images to Claude.",
+    image_rejected: "That image couldn't be used — try a different file.",
+    rate_limited: "Too many requests right now — try again in a bit.",
+    session_expired: "You'll need to sign in again to continue.",
+    refused: "Claude declined to answer that one.",
+    empty_completion: "Got an empty answer — try again.",
+    invalid_json: "The answer wasn't in the expected format — try again.",
+    prompt_too_large: "That request was too large.",
+    cancelled: "Cancelled.",
+    upstream_error: "Something went wrong reaching Claude — try again.",
+  };
+  return {
+    code,
+    message: map[code] || map.upstream_error,
+    retryable: !(
+      code === "not_granted" ||
+      code === "sampling_disabled" ||
+      code === "not_declared" ||
+      code === "capability_disabled" ||
+      code === "capability_removed" ||
+      code === "images_unavailable"
+    ),
+  };
+}
+
+function parseModelJson(text) {
+  let t = String(text == null ? "" : text).trim();
+  if (!t) throw Object.assign(new Error("empty_completion"), { code: "empty_completion" });
+  t = t.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+  const start = t.indexOf("{");
+  const end = t.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) {
+    throw Object.assign(new Error("invalid_json"), { code: "invalid_json" });
+  }
+  try {
+    return JSON.parse(t.slice(start, end + 1));
+  } catch {
+    throw Object.assign(new Error("invalid_json"), { code: "invalid_json" });
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const s = String(reader.result || "");
+      const i = s.indexOf(",");
+      resolve(i >= 0 ? s.slice(i + 1) : s);
+    };
+    reader.onerror = () => reject(Object.assign(new Error("image_rejected"), { code: "image_rejected" }));
+    reader.readAsDataURL(file);
+  });
+}
+
+function asFileList(images) {
+  if (!images) return [];
+  if (images instanceof File || images instanceof Blob) return [images];
+  if (typeof images.length === "number") return Array.prototype.slice.call(images);
+  return [images];
+}
+
+async function completeViaMessages(prompt, opts = {}) {
+  const content = [];
+  for (const f of asFileList(opts.images)) {
+    if (!f) continue;
+    content.push({
+      type: "image",
+      source: { type: "base64", media_type: f.type || "image/png", data: await fileToBase64(f) },
+    });
+  }
+  content.push({ type: "text", text: prompt });
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 2500,
+      messages: [{ role: "user", content }],
+    }),
+  });
+  if (!res.ok) {
+    const code = res.status === 429 ? "rate_limited" : res.status === 401 || res.status === 403 ? "not_granted" : "upstream_error";
+    throw Object.assign(new Error(code), { code });
+  }
+  const data = await res.json();
+  return parseModelJson(data && data.content && data.content[0] && data.content[0].text);
+}
+
+function defaultImageCaps() {
+  return { images: { maxInputBytes: 8 * 1024 * 1024, mediaTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"] } };
+}
+
+function wrapSampleApi(api) {
+  if (!api) return null;
+  if (typeof api.json === "function") return api;
+  if (typeof api.complete === "function") {
+    return {
+      limits: () => (api.limits ? api.limits() : Promise.resolve(defaultImageCaps())),
+      json: async (prompt, opts) => {
+        if (opts && opts.images) return completeViaMessages(prompt, opts);
+        return parseModelJson(await api.complete(prompt));
+      },
+    };
+  }
+  return null;
+}
+
+async function connectClaude() {
+  if (window.claude && typeof window.claude.use === "function") {
+    try {
+      const used = wrapSampleApi(await window.claude.use("sample"));
+      if (used) return used;
+    } catch {}
+  }
+  if (window.claude && typeof window.claude.complete === "function") {
+    const fromComplete = wrapSampleApi(window.claude);
+    if (fromComplete) return fromComplete;
+  }
+  if (window.claude) return { limits: () => Promise.resolve(defaultImageCaps()), json: completeViaMessages };
+  try {
+    const host = (window.location && window.location.hostname) || "";
+    if (/claude\.(ai|com)$/i.test(host) || host.indexOf("claude.ai") !== -1) {
+      return { limits: () => Promise.resolve(defaultImageCaps()), json: completeViaMessages };
+    }
+  } catch {}
+  return null;
+}
+
+function isBusy(d) {
+  if (!d) return false;
+  const st = [d.results.pm.status, d.results.eng.status, d.results.skeptic.status];
+  return st.includes("loading") || d.engineerRound2.status === "loading" || d.moderator.status === "loading";
+}
+
+function personaPoints(key, d) {
+  const dd = d.results[key].data;
+  const items = [];
+  if (dd.headline || dd.notes) items.push({ point: dd.headline || "Overall take", detail: dd.notes || "" });
+  const strengths = (dd.strengths || []).filter(Boolean);
+  if (strengths.length) items.push({ point: "What's working", detail: strengths.join(" ") });
+  const concerns = (dd.concerns || []).filter(Boolean);
+  if (concerns.length) items.push({ point: "What to watch", detail: concerns.join(" ") });
+  if (key === "eng" && d.engineerRound2.status === "done" && d.engineerRound2.data) {
+    const sm = STANCE_META[d.engineerRound2.data.stance] || STANCE_META["adds-nuance"];
+    items.push({
+      point: "On the Product Manager's critique — " + sm.label,
+      detail: d.engineerRound2.data.reaction || "",
+    });
+  }
+  return items;
+}
+
+function NumList({ items, tagFn }) {
+  return (
+    <div className="num-list">
+      {(items || []).map((pt, i) => {
+        const meta = tagFn ? tagFn(pt) : null;
+        return (
+          <div className="num-item" key={i}>
+            <p className="num-index">{String(i + 1).padStart(2, "0")}.</p>
+            <p className="num-subtitle">
+              {meta ? <span className={"num-tag " + meta.cls}>{meta.label}</span> : null}
+              {pt.point || ""}
+            </p>
+            <p className="num-body">{pt.detail || ""}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Skeleton() {
+  return (
+    <>
+      <span className="thinking-label">Reviewing the design…</span>
+      <div className="skeleton-line" style={{ width: "60%" }} />
+      <div className="skeleton-line" style={{ width: "92%" }} />
+      <div className="skeleton-line" style={{ width: "85%" }} />
+      <div className="skeleton-line" style={{ width: "70%" }} />
+    </>
+  );
+}
+
+function ProgressIcon({ status }) {
+  if (status === "loading") return <span className="prog-icon spin" />;
+  if (status === "done") return <span className="prog-icon done">✓</span>;
+  if (status === "error" || status === "skipped") return <span className="prog-icon err">×</span>;
+  return <span className="prog-icon">·</span>;
+}
+
+export default function App() {
+  const fileRef = useRef(null);
+  const store = useRef({
+    sample: null,
+    caps: null,
+    designs: [],
+    activeId: null,
+    activeTab: "summary",
+    compare: { beforeId: null, afterId: null, result: { status: "idle" }, stale: false },
+    pendingReviewIds: [],
+    banner: "",
+    hint: "",
+    hintError: false,
+    drag: false,
+    designCounter: 0,
+  });
+  const [, setTick] = useState(0);
+  const refresh = () => setTick((n) => n + 1);
+  const s = store.current;
+
+  const getDesign = (id) => s.designs.find((d) => d.id === id) || null;
+  const getActive = () => getDesign(s.activeId);
+
+  const setTab = (tab) => {
+    if (tab === "compare" && s.designs.length < 2) tab = "summary";
+    s.activeTab = tab;
+    refresh();
+  };
+
+  const markCompareStale = (designId) => {
+    if ((s.compare.beforeId === designId || s.compare.afterId === designId) && s.compare.result.status === "done") {
+      s.compare.stale = true;
+    }
+  };
+
+  async function runOne(designId, key) {
+    let d = getDesign(designId);
+    if (!s.sample || !d) return;
+    const persona = PERSONA_BY_KEY[key];
+    d.results[key] = { status: "loading" };
+    if (d.moderator.status === "done") d.summaryStale = true;
+    markCompareStale(designId);
+    refresh();
+    try {
+      const data = await s.sample.json(persona.prompt(), { images: d.file, modelTier: "default", cache: false });
+      d = getDesign(designId);
+      if (!d) return;
+      d.results[key] = { status: "done", data };
+    } catch (err) {
+      d = getDesign(designId);
+      if (!d) return;
+      const m = mapError(err);
+      d.results[key] = { status: "error", message: m.message, retryable: m.retryable };
+    }
+    refresh();
+    if (key === "pm") await runEngineerRound2(designId);
+    maybeAutoModerate(designId);
+  }
+
+  async function runEngineerRound2(designId) {
+    let d = getDesign(designId);
+    if (!s.sample || !d) return;
+    if (d.results.pm.status !== "done") {
+      d.engineerRound2 = { status: "skipped" };
+      refresh();
+      return;
+    }
+    d.engineerRound2 = { status: "loading" };
+    if (d.moderator.status === "done") d.summaryStale = true;
+    markCompareStale(designId);
+    refresh();
+    try {
+      const data = await s.sample.json(round2Prompt(d.results.pm.data), { images: d.file, modelTier: "default", cache: false });
+      d = getDesign(designId);
+      if (!d) return;
+      d.engineerRound2 = { status: "done", data };
+    } catch (err) {
+      d = getDesign(designId);
+      if (!d) return;
+      const m = mapError(err);
+      d.engineerRound2 = { status: "error", message: m.message, retryable: m.retryable };
+    }
+    refresh();
+  }
+
+  function maybeAutoModerate(designId) {
+    const d = getDesign(designId);
+    if (!d) return;
+    const settled = ["pm", "eng", "skeptic"].every((k) => d.results[k].status === "done" || d.results[k].status === "error");
+    if (!settled) return;
+    if (d.engineerRound2.status === "loading") return;
+    const succeeded = ["pm", "eng", "skeptic"].filter((k) => d.results[k].status === "done");
+    if (succeeded.length < 2) {
+      d.moderator = { status: "error", message: "Too few reviews completed to write a summary.", retryable: false };
+      refresh();
+      return;
+    }
+    runModerator(designId);
+  }
+
+  async function runModerator(designId) {
+    let d = getDesign(designId);
+    if (!s.sample || !d) return;
+    const succeeded = PERSONAS.filter((p) => d.results[p.key].status === "done");
+    if (succeeded.length < 2) {
+      d.moderator = { status: "error", message: "Too few reviews completed to write a summary.", retryable: false };
+      refresh();
+      return;
+    }
+    d.moderator = { status: "loading" };
+    d.summaryStale = false;
+    markCompareStale(designId);
+    refresh();
+    const missing = PERSONAS.filter((p) => d.results[p.key].status !== "done").map((p) => p.role);
+    const body = succeeded
+      .map((p) => {
+        const pd = d.results[p.key].data;
+        return p.role.toUpperCase() + " (verdict: " + pd.verdict + ") — " + pd.headline + "\n" + pd.notes;
+      })
+      .join("\n\n");
+    let round2Note = "";
+    if (d.engineerRound2.status === "done") {
+      const r2 = d.engineerRound2.data;
+      round2Note =
+        "\n\nSECOND ROUND — the Engineer then read the Product Manager's critique above and reacted to it directly (stance: " +
+        r2.stance +
+        "): " +
+        r2.reaction;
+    }
+    const prompt =
+      "You are moderating a design review panel. Independent reviewers each critiqued the same UI design. Their reviews:\n\n" +
+      body +
+      round2Note +
+      (missing.length ? "\n\n(The following reviewer's critique could not be generated and is not included: " + missing.join(", ") + ".)" : "") +
+      "\n\nRead all of the above, including the direct exchange between the Engineer and the Product Manager in the second round, and identify the specific places these reviewers agree with each other, and the specific places they disagree or trade off against each other. " +
+      "Reply with ONLY a JSON object, no other text, matching exactly:\n" +
+      '{"points": [{"type": "agreement" | "tension", "point": "a short subtitle, under 8 words", "detail": "1-2 sentences explaining it, plain prose"}], ' +
+      '"synthesis": "2-3 closing sentences of plain prose giving your overall take, no lists, no markdown"}\n' +
+      "Include 3 to 6 items in points, mixing both agreement and tension types, ordered by how important each is.";
+    try {
+      const data = await s.sample.json(prompt, { modelTier: "default", cache: false });
+      d = getDesign(designId);
+      if (!d) return;
+      d.moderator = { status: "done", data };
+    } catch (err) {
+      d = getDesign(designId);
+      if (!d) return;
+      const m = mapError(err);
+      d.moderator = { status: "error", message: m.message, retryable: m.retryable };
+    }
+    refresh();
+  }
+
+  async function submitCritique(designId) {
+    const d = getDesign(designId);
+    if (!d || isBusy(d)) return;
+    if (!s.sample) {
+      if (!s.pendingReviewIds.includes(designId)) s.pendingReviewIds.push(designId);
+      return;
+    }
+    d.results = { pm: { status: "loading" }, eng: { status: "loading" }, skeptic: { status: "loading" } };
+    d.engineerRound2 = { status: "idle" };
+    d.moderator = { status: "idle" };
+    d.summaryStale = false;
+    markCompareStale(designId);
+    if (s.activeId === designId) s.activeTab = "summary";
+    refresh();
+    await Promise.all(
+      PERSONAS.map(async (p) => {
+        try {
+          const data = await s.sample.json(p.prompt(), { images: d.file, modelTier: "default", cache: false });
+          const dd = getDesign(designId);
+          if (!dd) return;
+          dd.results[p.key] = { status: "done", data };
+        } catch (err) {
+          const dd2 = getDesign(designId);
+          if (!dd2) return;
+          const m = mapError(err);
+          dd2.results[p.key] = { status: "error", message: m.message, retryable: m.retryable };
+        }
+        refresh();
+      })
+    );
+    if (getDesign(designId)) await runEngineerRound2(designId);
+    maybeAutoModerate(designId);
+    refresh();
+  }
+
+  async function runCompare() {
+    const before = getDesign(s.compare.beforeId);
+    const after = getDesign(s.compare.afterId);
+    if (!s.sample || !before || !after) return;
+    s.compare.result = { status: "loading" };
+    s.compare.stale = false;
+    refresh();
+    const describe = (d, label) => {
+      const lines = [label.toUpperCase() + ' — "' + d.name + '" (moderator verdict: ' + d.moderator.data.verdict + ")"];
+      PERSONAS.forEach((p) => {
+        const r = d.results[p.key];
+        if (r.status === "done") lines.push(p.role.toUpperCase() + " (" + r.data.verdict + "): " + r.data.headline + " — " + r.data.notes);
+      });
+      if (d.engineerRound2.status === "done") {
+        lines.push("ENGINEER, reacting to the PM (" + d.engineerRound2.data.stance + "): " + d.engineerRound2.data.reaction);
+      }
+      lines.push("MODERATOR SYNTHESIS: " + d.moderator.data.synthesis);
+      return lines.join("\n");
+    };
+    const prompt =
+      "You are comparing two rounds of design-review panel feedback on two versions of the same product screen: a BEFORE version and an AFTER version. Here is the full panel feedback for each:\n\n" +
+      describe(before, "before") +
+      "\n\n" +
+      describe(after, "after") +
+      "\n\nCompare them and tell the before/after story: what specifically got better, what got worse, and what stayed a problem in both. Ground every point in what the reviewers actually said. " +
+      "Reply with ONLY a JSON object, no other text, matching exactly:\n" +
+      '{"verdictShift": "one short sentence naming the overall shift from before to after", ' +
+      '"points": [{"type": "improved" | "regressed" | "unchanged", "point": "a short subtitle, under 8 words", "detail": "1-2 sentences explaining it, plain prose, referencing which reviewer(s) said so"}], ' +
+      '"synthesis": "2-3 closing sentences of plain prose giving your overall take on whether the after version is ready, no lists, no markdown"}\n' +
+      "Include 3 to 6 items in points, mixing improved, regressed and unchanged where each genuinely applies.";
+    try {
+      const data = await s.sample.json(prompt, { modelTier: "default", cache: false });
+      s.compare.result = { status: "done", data };
+    } catch (err) {
+      const m = mapError(err);
+      s.compare.result = { status: "error", message: m.message, retryable: m.retryable };
+    }
+    refresh();
+  }
+
+  function addFiles(fileList) {
+    const maxBytes = s.caps && s.caps.images ? s.caps.images.maxInputBytes : null;
+    const addedIds = [];
+    let rejected = 0;
+    for (const f of fileList) {
+      if (maxBytes && f.size > maxBytes) {
+        rejected += 1;
+        continue;
+      }
+      s.designCounter += 1;
+      const d = {
+        id: "d" + s.designCounter,
+        file: f,
+        url: URL.createObjectURL(f),
+        name: f.name,
+        size: f.size,
+        results: { pm: { status: "idle" }, eng: { status: "idle" }, skeptic: { status: "idle" } },
+        engineerRound2: { status: "idle" },
+        moderator: { status: "idle" },
+        summaryStale: false,
+      };
+      s.designs.push(d);
+      addedIds.push(d.id);
+    }
+    if (addedIds.length) s.activeId = addedIds[addedIds.length - 1];
+    if (rejected) {
+      s.hint = rejected + " file" + (rejected > 1 ? "s were" : " was") + " too large for this view (max ~" + Math.round(maxBytes / 1024 / 1024) + " MB) and skipped.";
+      s.hintError = true;
+    } else {
+      s.hintError = false;
+      s.hint = "";
+    }
+    refresh();
+    addedIds.forEach((id) => submitCritique(id));
+  }
+
+  function removeDesign(id) {
+    const idx = s.designs.findIndex((d) => d.id === id);
+    if (idx === -1) return;
+    URL.revokeObjectURL(s.designs[idx].url);
+    s.designs.splice(idx, 1);
+    if (s.activeId === id) s.activeId = s.designs.length ? s.designs[Math.min(idx, s.designs.length - 1)].id : null;
+    if (s.compare.beforeId === id) {
+      s.compare.beforeId = null;
+      s.compare.result = { status: "idle" };
+      s.compare.stale = false;
+    }
+    if (s.compare.afterId === id) {
+      s.compare.afterId = null;
+      s.compare.result = { status: "idle" };
+      s.compare.stale = false;
+    }
+    if (s.designs.length < 2 && s.activeTab === "compare") s.activeTab = "summary";
+    refresh();
+  }
 
   useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return;
-    host.innerHTML = MARKUP;
-
-    const boot = document.createElement("script");
-    boot.textContent = '(function(){\n  "use strict";\n\n  var PERSONAS = [\n    {\n      key:"pm", name:"Priya Nandan", role:"Project Manager", initials:"PM",\n      colorVar:"--pm",\n      prompt: function(){ return (\n        "You are Priya Nandan, a pragmatic senior Product Manager reviewing a UI design (the attached image) before it goes to engineering. " +\n        "Judge it strictly from a product and business lens: does it serve a clear user goal, is the scope right, what\'s missing or unnecessary, what would you cut or add, how would you know it worked. " +\n        "Be specific to what you actually see in the image, not generic advice. " +\n        "Reply with ONLY a JSON object, no other text, matching exactly:\\n" +\n        \'{"verdict": "ship-it" | "needs-work" | "big-concerns", "headline": "one short punchy sentence, your overall take", \' +\n        \'"strengths": ["short phrase", "short phrase"], "concerns": ["short phrase", "short phrase"], \' +\n        \'"notes": "2-3 sentences in your own voice, plain prose, no lists, no markdown"}\\n\' +\n        "strengths and concerns should each have 1 to 3 items."\n      );}\n    },\n    {\n      key:"eng", name:"Devon Okafor", role:"Engineer", initials:"EN",\n      colorVar:"--eng",\n      prompt: function(){ return (\n        "You are Devon Okafor, a senior software engineer reviewing a UI design (the attached image) that you would have to build. " +\n        "Judge it strictly from a technical/feasibility lens: implementation complexity, edge cases and empty/error states, data the screen implies, performance or accessibility concerns, and anything ambiguous you\'d need clarified before estimating it. " +\n        "Be specific to what you actually see in the image, not generic advice. " +\n        "Reply with ONLY a JSON object, no other text, matching exactly:\\n" +\n        \'{"verdict": "ship-it" | "needs-work" | "big-concerns", "headline": "one short punchy sentence, your overall take", \' +\n        \'"strengths": ["short phrase", "short phrase"], "concerns": ["short phrase", "short phrase"], \' +\n        \'"notes": "2-3 sentences in your own voice, plain prose, no lists, no markdown"}\\n\' +\n        "strengths and concerns should each have 1 to 3 items."\n      );}\n    },\n    {\n      key:"skeptic", name:"Mara Lindqvist", role:"User", initials:"US",\n      colorVar:"--skeptic",\n      prompt: function(){ return (\n        "You are Mara Lindqvist, a skeptical, impatient first-time user looking at a UI design (the attached image), not a professional designer. " +\n        "Judge it strictly from that lens: what would confuse you, where would you hesitate or not trust it, what jargon or assumptions annoy you, would you actually bother using this. " +\n        "Be specific to what you actually see in the image, not generic advice. " +\n        "Reply with ONLY a JSON object, no other text, matching exactly:\\n" +\n        \'{"verdict": "ship-it" | "needs-work" | "big-concerns", "headline": "one short punchy sentence, your overall take", \' +\n        \'"strengths": ["short phrase", "short phrase"], "concerns": ["short phrase", "short phrase"], \' +\n        \'"notes": "2-3 sentences in your own voice, plain prose, no lists, no markdown"}\\n\' +\n        "strengths and concerns should each have 1 to 3 items."\n      );}\n    }\n  ];\n  var PERSONA_BY_KEY = {};\n  PERSONAS.forEach(function(p){ PERSONA_BY_KEY[p.key] = p; });\n\n  var VERDICT_META = {\n    "ship-it": {label:"Ship it", cls:"good"},\n    "needs-work": {label:"Needs work", cls:"warn"},\n    "big-concerns": {label:"Big concerns", cls:"bad"}\n  };\n  var STANCE_META = {\n    "agrees": {label:"Agrees", cls:"good"},\n    "pushes-back": {label:"Pushes back", cls:"bad"},\n    "adds-nuance": {label:"Adds nuance", cls:"warn"}\n  };\n\n  function round2Prompt(pmData){\n    return (\n      "You are Devon Okafor, a senior software engineer. You already reviewed a UI design (the attached image) independently. " +\n      "Now you\'ve been shown a fellow reviewer\'s critique of the SAME design — the Product Manager, Priya Nandan. Read her critique below and react to it directly, from your own engineering standpoint. " +\n      "Say plainly what you agree with, what you\'d push back on or find unrealistic, and anything important she missed that you\'d want her to know.\\n\\n" +\n      "PRIYA\'S CRITIQUE (verdict: " + pmData.verdict + "):\\n" +\n      "Headline: " + pmData.headline + "\\n" +\n      "Strengths she noted: " + (pmData.strengths||[]).join("; ") + "\\n" +\n      "Concerns she raised: " + (pmData.concerns||[]).join("; ") + "\\n" +\n      "Her notes: " + pmData.notes + "\\n\\n" +\n      "Reply with ONLY a JSON object, no other text, matching exactly:\\n" +\n      \'{"stance": "agrees" | "pushes-back" | "adds-nuance", \' +\n      \'"reaction": "2-4 sentences in your own voice as Devon, responding specifically to what Priya said, no lists, no markdown"}\'\n    );\n  }\n\n  function $(id){ return document.getElementById(id); }\n  function esc(s){\n    return String(s == null ? "" : s).replace(/[&<>"\']/g, function(c){\n      return {"&":"&amp;","<":"&lt;",">":"&gt;",\'"\':"&quot;","\'":"&#39;"}[c];\n    });\n  }\n\n  function mapError(err){\n    var code = (err && err.code) || "upstream_error";\n    var map = {\n      not_granted: "You declined (or your organization has not allowed) Claude access for this page.",\n      sampling_disabled: "Claude isn\'t available for this account right now.",\n      not_declared: "This page\'s Claude access isn\'t set up correctly.",\n      capability_disabled: "Claude access isn\'t usable in this view.",\n      capability_removed: "This viewer doesn\'t support that call.",\n      images_unavailable: "This view can\'t send images to Claude.",\n      image_rejected: "That image couldn\'t be used — try a different file.",\n      rate_limited: "Too many requests right now — try again in a bit.",\n      session_expired: "You\'ll need to sign in again to continue.",\n      refused: "Claude declined to answer that one.",\n      empty_completion: "Got an empty answer — try again.",\n      invalid_json: "The answer wasn\'t in the expected format — try again.",\n      prompt_too_large: "That request was too large.",\n      cancelled: "Cancelled.",\n      upstream_error: "Something went wrong reaching Claude — try again."\n    };\n    return {code: code, message: map[code] || map.upstream_error, retryable: !(\n      code === "not_granted" || code === "sampling_disabled" || code === "not_declared" ||\n      code === "capability_disabled" || code === "capability_removed" || code === "images_unavailable"\n    )};\n  }\n\n  // ---------- state ----------\n  var designCounter = 0;\n  function makeDesign(file){\n    designCounter += 1;\n    return {\n      id: "d" + designCounter,\n      file: file,\n      url: URL.createObjectURL(file),\n      name: file.name,\n      size: file.size,\n      results: {pm:{status:"idle"}, eng:{status:"idle"}, skeptic:{status:"idle"}},\n      engineerRound2: {status:"idle"},\n      moderator: {status:"idle"},\n      summaryStale: false\n    };\n  }\n\n  var state = {\n    sample: null,\n    caps: undefined,\n    designs: [],\n    activeId: null,\n    activeTab: "summary",\n    compare: {beforeId:null, afterId:null, result:{status:"idle"}, stale:false},\n    pendingReviewIds: []\n  };\n\n  function getDesign(id){\n    for(var i=0;i<state.designs.length;i++) if(state.designs[i].id === id) return state.designs[i];\n    return null;\n  }\n  function getActive(){ return getDesign(state.activeId); }\n  function designLabel(d){ return d ? d.name : ""; }\n\n  function designStatus(d){\n    var st = [d.results.pm.status, d.results.eng.status, d.results.skeptic.status];\n    if(st.indexOf("loading") !== -1 || d.engineerRound2.status === "loading" || d.moderator.status === "loading") return "Reviewing…";\n    if(d.moderator.status === "done") return "Reviewed";\n    if(st.indexOf("done") !== -1 || st.indexOf("error") !== -1) return "Partially reviewed";\n    return "Not reviewed yet";\n  }\n\n  function isBusy(d){\n    if(!d) return false;\n    var st = [d.results.pm.status, d.results.eng.status, d.results.skeptic.status];\n    return st.indexOf("loading") !== -1 || d.engineerRound2.status === "loading" || d.moderator.status === "loading";\n  }\n\n  // ---------- capability setup ----------\n  function setCapBanner(msg){\n    $("capBanner").innerHTML = msg ? (\'<div class="banner">\' + esc(msg) + \'</div>\') : "";\n  }\n\n  function parseModelJson(text){\n    var t = String(text == null ? "" : text).trim();\n    if(!t) throw Object.assign(new Error("empty_completion"), {code:"empty_completion"});\n    t = t.replace(/^```(?:json)?\\s*/i, "").replace(/\\s*```$/i, "").trim();\n    var start = t.indexOf("{"), end = t.lastIndexOf("}");\n    if(start === -1 || end === -1 || end <= start){\n      throw Object.assign(new Error("invalid_json"), {code:"invalid_json"});\n    }\n    try{ return JSON.parse(t.slice(start, end + 1)); }\n    catch(e){ throw Object.assign(new Error("invalid_json"), {code:"invalid_json"}); }\n  }\n\n  function fileToBase64(file){\n    return new Promise(function(resolve, reject){\n      var reader = new FileReader();\n      reader.onload = function(){\n        var s = String(reader.result || "");\n        var i = s.indexOf(",");\n        resolve(i >= 0 ? s.slice(i + 1) : s);\n      };\n      reader.onerror = function(){ reject(Object.assign(new Error("image_rejected"), {code:"image_rejected"})); };\n      reader.readAsDataURL(file);\n    });\n  }\n\n  function asFileList(images){\n    if(!images) return [];\n    if(images instanceof File || images instanceof Blob) return [images];\n    if(typeof images.length === "number") return Array.prototype.slice.call(images);\n    return [images];\n  }\n\n  async function completeViaMessages(prompt, opts){\n    opts = opts || {};\n    var content = [];\n    var files = asFileList(opts.images);\n    for(var i = 0; i < files.length; i++){\n      var f = files[i];\n      if(!f) continue;\n      var b64 = await fileToBase64(f);\n      content.push({\n        type: "image",\n        source: {\n          type: "base64",\n          media_type: f.type || "image/png",\n          data: b64\n        }\n      });\n    }\n    content.push({type:"text", text: prompt});\n    var res = await fetch("/api/critique", {\n      method: "POST",\n      headers: {"Content-Type":"application/json"},\n      body: JSON.stringify({\n        model: "claude-sonnet-4-20250514",\n        max_tokens: 2500,\n        messages: [{role:"user", content: content}]\n      })\n    });\n    if(!res.ok){\n      var code = res.status === 429 ? "rate_limited" : (res.status === 401 || res.status === 403 ? "not_granted" : "upstream_error");\n      throw Object.assign(new Error(code), {code: code});\n    }\n    var data = await res.json();\n    var text = data && data.content && data.content[0] && data.content[0].text;\n    return parseModelJson(text);\n  }\n\n  function defaultImageCaps(){\n    return {images:{maxInputBytes: 8 * 1024 * 1024, mediaTypes:["image/png","image/jpeg","image/webp","image/gif"]}};\n  }\n\n  function wrapSampleApi(api){\n    if(!api) return null;\n    if(typeof api.json === "function") return api;\n    if(typeof api.complete === "function"){\n      return {\n        limits: function(){ return api.limits ? api.limits() : Promise.resolve(defaultImageCaps()); },\n        json: async function(prompt, opts){\n          if(opts && opts.images) return completeViaMessages(prompt, opts);\n          var text = await api.complete(prompt);\n          return parseModelJson(text);\n        }\n      };\n    }\n    return null;\n  }\n\n  function makeHostSample(){\n    return {\n      limits: function(){ return Promise.resolve(defaultImageCaps()); },\n      json: completeViaMessages\n    };\n  }\n\n  function claudeHostAvailable(){\n    if(window.claude) return true;\n    try{\n      var host = (window.location && window.location.hostname) || "";\n      if(/claude\\.(ai|com)$/i.test(host) || host.indexOf("claude.ai") !== -1) return true;\n    }catch(e){}\n    return false;\n  }\n\n  async function connectClaude(){\n    if(window.claude && typeof window.claude.use === "function"){\n      try{\n        var used = wrapSampleApi(await window.claude.use("sample"));\n        if(used) return used;\n      }catch(e){}\n    }\n    if(window.claude && typeof window.claude.complete === "function"){\n      var fromComplete = wrapSampleApi(window.claude);\n      if(fromComplete) return fromComplete;\n    }\n    if(claudeHostAvailable()) return makeHostSample();\n    return null;\n  }\n\n  async function initSample(){\n    try{ state.sample = await connectClaude(); }\n    catch(e){ state.sample = null; }\n\n    if(!state.sample){\n      setCapBanner("This page can\'t reach Claude in this view, so the panel review is unavailable here. Open it as a Claude artifact (or on claude.ai) to run critiques.");\n      $("runHint").textContent = "Unavailable in this view.";\n      return;\n    }\n\n    try{ state.caps = await state.sample.limits(); }\n    catch(e){ state.caps = defaultImageCaps(); }\n\n    if(!state.caps || !state.caps.images){\n      state.caps = defaultImageCaps();\n    }\n\n    if(state.caps.images.mediaTypes && state.caps.images.mediaTypes.length){\n      $("fileInput").setAttribute("accept", state.caps.images.mediaTypes.join(","));\n    }\n    setCapBanner("");\n    renderSidebar();\n    var queued = state.pendingReviewIds.splice(0);\n    queued.forEach(function(id){ submitCritique(id); });\n  }\n\n  // ---------- upload handling ----------\n  var dropzone = $("dropzone"), fileInput = $("fileInput");\n  dropzone.addEventListener("click", function(){ fileInput.click(); });\n  dropzone.addEventListener("keydown", function(e){\n    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); fileInput.click(); }\n  });\n  ["dragenter","dragover"].forEach(function(ev){\n    dropzone.addEventListener(ev, function(e){ e.preventDefault(); dropzone.classList.add("drag"); });\n  });\n  ["dragleave","drop"].forEach(function(ev){\n    dropzone.addEventListener(ev, function(e){ e.preventDefault(); dropzone.classList.remove("drag"); });\n  });\n  dropzone.addEventListener("drop", function(e){\n    var files = e.dataTransfer && e.dataTransfer.files;\n    if(files && files.length) addFiles(files);\n  });\n  fileInput.addEventListener("change", function(e){\n    if(e.target.files && e.target.files.length) addFiles(e.target.files);\n    fileInput.value = "";\n  });\n\n  function addFiles(fileList){\n    var maxBytes = state.caps && state.caps.images ? state.caps.images.maxInputBytes : null;\n    var addedIds = [], rejected = 0;\n    for(var i=0;i<fileList.length;i++){\n      var f = fileList[i];\n      if(maxBytes && f.size > maxBytes){ rejected++; continue; }\n      var d = makeDesign(f);\n      state.designs.push(d);\n      addedIds.push(d.id);\n    }\n    if(addedIds.length) state.activeId = addedIds[addedIds.length - 1];\n    if(rejected){\n      $("runHint").textContent = rejected + " file" + (rejected>1?"s were":" was") + " too large for this view (max ~" + Math.round(maxBytes/1024/1024) + " MB) and skipped.";\n      $("runHint").classList.add("error");\n    } else {\n      $("runHint").classList.remove("error");\n    }\n    render();\n    addedIds.forEach(function(id){ submitCritique(id); });\n  }\n\n  function removeDesign(id){\n    var idx = -1;\n    for(var i=0;i<state.designs.length;i++) if(state.designs[i].id === id){ idx = i; break; }\n    if(idx === -1) return;\n    var d = state.designs[idx];\n    URL.revokeObjectURL(d.url);\n    state.designs.splice(idx, 1);\n\n    if(state.activeId === id){\n      if(state.designs.length){\n        var newIdx = Math.min(idx, state.designs.length - 1);\n        state.activeId = state.designs[newIdx].id;\n      } else {\n        state.activeId = null;\n      }\n    }\n    if(state.compare.beforeId === id){ state.compare.beforeId = null; state.compare.result = {status:"idle"}; state.compare.stale=false; }\n    if(state.compare.afterId === id){ state.compare.afterId = null; state.compare.result = {status:"idle"}; state.compare.stale=false; }\n    render();\n  }\n\n  // ---------- tabs ----------\n  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(btn){\n    btn.addEventListener("click", function(){ setTab(btn.getAttribute("data-tab")); });\n  });\n  function setTab(tab){\n    if(tab === "compare" && state.designs.length < 2) tab = "summary";\n    state.activeTab = tab;\n    Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(btn){\n      var on = btn.getAttribute("data-tab") === tab;\n      btn.classList.toggle("active", on);\n      btn.setAttribute("aria-selected", on ? "true" : "false");\n    });\n    renderContent();\n  }\n\n  function syncCompareTab(){\n    var tab = document.querySelector(\'[data-tab="compare"]\');\n    var show = state.designs.length > 1;\n    if(tab) tab.hidden = !show;\n    if(!show && state.activeTab === "compare") setTab("summary");\n  }\n\n  // ---------- sidebar rendering ----------\n  function renderSidebar(){\n    var hint = $("runHint");\n    var active = getActive();\n\n    if(state.sample && state.caps && state.caps.images){\n      if(!active){\n        hint.textContent = "Upload a design to begin.";\n        hint.classList.remove("error");\n      } else if(isBusy(active)){\n        hint.textContent = "Reviewing “" + active.name + "”…";\n        hint.classList.remove("error");\n      } else if(!hint.classList.contains("error")){\n        hint.textContent = "";\n      }\n    }\n\n    var listEl = $("designList");\n    if(!state.designs.length){\n      listEl.hidden = true;\n      listEl.innerHTML = "";\n      return;\n    }\n    listEl.hidden = false;\n    listEl.innerHTML = state.designs.map(function(d){\n      return (\n        \'<div class="design-row\' + (d.id === state.activeId ? \' active\' : \'\') + \'" data-id="\' + d.id + \'">\' +\n          \'<img class="design-thumb" src="\' + d.url + \'" alt="">\' +\n          \'<div class="design-meta">\' +\n            \'<p class="design-name">\' + esc(d.name) + \'</p>\' +\n            \'<p class="design-sub">\' + Math.max(1, Math.round(d.size/1024)) + \' kb</p>\' +\n          \'</div>\' +\n          \'<button type="button" class="design-remove" data-remove="\' + d.id + \'" title="Remove this design" aria-label="Remove \' + esc(d.name) + \'">&times;</button>\' +\n        \'</div>\'\n      );\n    }).join("");\n\n    Array.prototype.forEach.call(listEl.querySelectorAll(".design-row"), function(row){\n      row.addEventListener("click", function(e){\n        if(e.target.closest("[data-remove]")) return;\n        state.activeId = row.getAttribute("data-id");\n        render();\n      });\n    });\n    Array.prototype.forEach.call(listEl.querySelectorAll("[data-remove]"), function(btnEl){\n      btnEl.addEventListener("click", function(e){\n        e.stopPropagation();\n        removeDesign(btnEl.getAttribute("data-remove"));\n      });\n    });\n  }\n\n  // ---------- content rendering ----------\n  function renderContent(){\n    if(state.activeTab === "summary") renderSummaryTab();\n    else if(state.activeTab === "compare") renderCompareTab();\n    else renderPersonaTab(state.activeTab);\n  }\n\n  function personaPoints(key, d){\n    var dd = d.results[key].data;\n    var items = [];\n    if(dd.headline || dd.notes){\n      items.push({point: dd.headline || "Overall take", detail: dd.notes || ""});\n    }\n    var strengths = (dd.strengths || []).filter(Boolean);\n    if(strengths.length){\n      items.push({point: "What\'s working", detail: strengths.join(" ")});\n    }\n    var concerns = (dd.concerns || []).filter(Boolean);\n    if(concerns.length){\n      items.push({point: "What to watch", detail: concerns.join(" ")});\n    }\n    if(key === "eng" && d.engineerRound2.status === "done" && d.engineerRound2.data){\n      var sm = STANCE_META[d.engineerRound2.data.stance] || STANCE_META["adds-nuance"];\n      items.push({\n        point: "On the Product Manager\'s critique — " + sm.label,\n        detail: d.engineerRound2.data.reaction || ""\n      });\n    }\n    return items;\n  }\n\n  function renderPersonaTab(key){\n    var d = getActive();\n    var p = PERSONA_BY_KEY[key];\n    var html = \'<h2 class="panel-title">\' + esc(p.role) + \'</h2>\';\n    if(!d){\n      html += \'<p class="empty-state">Upload a design on the left to hear from \' + esc(p.name) + \'.</p>\';\n      $("contentCard").innerHTML = html;\n      return;\n    }\n    var r = d.results[key];\n\n    if(r.status === "idle"){\n      html += \'<p class="empty-state">No review yet for “\' + esc(d.name) + \'”. Upload starts the critique — \' + esc(p.name) + \'’s notes will appear here.</p>\';\n    } else if(r.status === "loading" || (key === "eng" && d.engineerRound2.status === "loading")){\n      html +=\n        \'<span class="thinking-label">Reviewing the design…</span>\' +\n        \'<div class="skeleton-line" style="width:60%"></div>\' +\n        \'<div class="skeleton-line" style="width:92%"></div>\' +\n        \'<div class="skeleton-line" style="width:85%"></div>\' +\n        \'<div class="skeleton-line" style="width:70%"></div>\';\n    } else if(r.status === "error"){\n      html += \'<p class="state-error">\' + esc(r.message) +\n        (r.retryable ? \' <span class="retry-link" id="retryPersona" style="display:inline-block;margin-top:4px;">Try again</span>\' : \'\') +\n        \'</p>\';\n    } else {\n      html += numListHtml(personaPoints(key, d));\n      if(d.engineerRound2.status === "error" && key === "eng"){\n        html += \'<p class="state-error" style="margin-top:18px;">\' + esc(d.engineerRound2.message) +\n          (d.engineerRound2.retryable ? \' <span class="retry-link" id="retryRound2" style="display:inline-block;margin-top:4px;">Try again</span>\' : \'\') +\n          \'</p>\';\n      }\n      html += \'<div class="regen-row"><button type="button" id="redoBtn">Regenerate</button></div>\';\n    }\n\n    $("contentCard").innerHTML = html;\n    var redo = $("redoBtn"); if(redo) redo.addEventListener("click", function(){ runOne(d.id, key); });\n    var retry = $("retryPersona"); if(retry) retry.addEventListener("click", function(){ runOne(d.id, key); });\n    var retryR2 = $("retryRound2"); if(retryR2) retryR2.addEventListener("click", function(){ runEngineerRound2(d.id).then(function(){ maybeAutoModerate(d.id); }); });\n  }\n\n  function renderSummaryTab(){\n    var d = getActive();\n    var html = \'<h2 class="panel-title">Moderator</h2>\';\n    if(!d){\n      html += \'<p class="empty-state">Upload a design on the left — the moderator\\\'s synthesis of all three reviewers will appear here once they\\\'re done.</p>\';\n      $("contentCard").innerHTML = html;\n      return;\n    }\n\n    var anyStarted = ["pm","eng","skeptic"].some(function(k){ return d.results[k].status !== "idle"; });\n    if(!anyStarted && d.moderator.status === "idle"){\n      html += \'<p class="empty-state">No review yet for “\' + esc(d.name) + \'”. The moderator’s synthesis of all three reviewers will appear here once they’re done.</p>\';\n      $("contentCard").innerHTML = html;\n      return;\n    }\n\n    var anyPersonaDone = ["pm","eng","skeptic"].some(function(k){ return d.results[k].status === "done"; });\n    if(d.moderator.status === "idle" || d.moderator.status === "loading" ||\n       (d.moderator.status === "error" && d.moderator.retryable === false && !anyPersonaDone)){\n      var items = PERSONAS.map(function(p){\n        var r = d.results[p.key];\n        var icon = \'<span class="prog-icon">&middot;</span>\', status = "Waiting";\n        if(r.status === "loading"){ icon = \'<span class="prog-icon spin"></span>\'; status = "Reviewing…"; }\n        if(r.status === "done"){ icon = \'<span class="prog-icon done">&#10003;</span>\'; status = "Done"; }\n        if(r.status === "error"){ icon = \'<span class="prog-icon err">&times;</span>\'; status = "Couldn\'t complete"; }\n        return \'<li>\' + icon + \'<span class="prog-name">\' + esc(p.name) + \'</span><span class="prog-status">\' + status + \'</span></li>\';\n      });\n      var r2 = d.engineerRound2;\n      var r2Icon = \'<span class="prog-icon">&middot;</span>\', r2Status = "Waiting";\n      if(r2.status === "loading"){ r2Icon = \'<span class="prog-icon spin"></span>\'; r2Status = "Reacting to the PM…"; }\n      if(r2.status === "done"){ r2Icon = \'<span class="prog-icon done">&#10003;</span>\'; r2Status = "Done"; }\n      if(r2.status === "error"){ r2Icon = \'<span class="prog-icon err">&times;</span>\'; r2Status = "Couldn\'t complete"; }\n      if(r2.status === "skipped"){ r2Icon = \'<span class="prog-icon err">&middot;</span>\'; r2Status = "Skipped"; }\n      items.push(\'<li>\' + r2Icon + \'<span class="prog-name">Engineer — round 2</span><span class="prog-status">\' + r2Status + \'</span></li>\');\n\n      var modStatus = d.moderator.status === "loading" ? "Reading the panel…" : "Waiting on reviewers";\n      var modIcon = d.moderator.status === "loading" ? \'<span class="prog-icon spin"></span>\' : \'<span class="prog-icon">&middot;</span>\';\n      items.push(\'<li>\' + modIcon + \'<span class="prog-name">Moderator</span><span class="prog-status">\' + modStatus + \'</span></li>\');\n      html += \'<ul class="progress-list">\' + items.join("") + \'</ul>\';\n      $("contentCard").innerHTML = html;\n      return;\n    }\n\n    if(d.moderator.status === "error"){\n      html += \'<p class="state-error">\' + esc(d.moderator.message) +\n        (d.moderator.retryable ? \' <span class="retry-link" id="retryModerator" style="display:inline-block;margin-top:4px;">Try again</span>\' : \'\') +\n        \'</p>\';\n      $("contentCard").innerHTML = html;\n      var rl = $("retryModerator"); if(rl) rl.addEventListener("click", function(){ runModerator(d.id); });\n      return;\n    }\n\n    var data = d.moderator.data;\n    if(d.summaryStale){\n      html += \'<div class="stale-banner">Reviews changed since this summary was written.<button type="button" id="regenStaleBtn">Regenerate</button></div>\';\n    }\n    html += numListHtml(data.points || [], function(pt){\n      return pt.type === "tension"\n        ? {cls:"tension", label:"Tension"}\n        : {cls:"agreement", label:"Agreement"};\n    });\n    html += \'<p class="num-closing">\' + esc(data.synthesis) + \'</p>\';\n    html += \'<div class="regen-row"><button type="button" id="regenBtn">Regenerate</button></div>\';\n\n    $("contentCard").innerHTML = html;\n    var rb = $("regenBtn"); if(rb) rb.addEventListener("click", function(){ runModerator(d.id); });\n    var rsb = $("regenStaleBtn"); if(rsb) rsb.addEventListener("click", function(){ runModerator(d.id); });\n  }\n\n  // ---------- compare tab ----------\n  function reviewedDesigns(){\n    return state.designs.filter(function(d){ return d.moderator.status === "done"; });\n  }\n\n  function renderCompareTab(){\n    var html = \'<h2 class="panel-title">Compare</h2>\';\n    if(state.designs.length < 2){\n      html += \'<p class="empty-state">Upload a second design to compare it against another.</p>\';\n      $("contentCard").innerHTML = html;\n      return;\n    }\n\n    if(!state.compare.beforeId || !getDesign(state.compare.beforeId)) state.compare.beforeId = state.designs[0].id;\n    if(!state.compare.afterId || !getDesign(state.compare.afterId) || state.compare.afterId === state.compare.beforeId){\n      var alt = state.designs.filter(function(d){ return d.id !== state.compare.beforeId; })[0];\n      state.compare.afterId = alt ? alt.id : state.designs[0].id;\n    }\n    var before = getDesign(state.compare.beforeId), after = getDesign(state.compare.afterId);\n\n    html += \'<div class="compare-pickers">\' +\n      \'<label class="pts-label">Before<select id="beforeSelect">\' + state.designs.map(function(d){\n        return \'<option value="\' + d.id + \'"\' + (d.id===before.id?\' selected\':\'\') + \'>\' + esc(d.name) + \'</option>\';\n      }).join(\'\') + \'</select></label>\' +\n      \'<label class="pts-label">After<select id="afterSelect">\' + state.designs.map(function(d){\n        return \'<option value="\' + d.id + \'"\' + (d.id===after.id?\' selected\':\'\') + \'>\' + esc(d.name) + \'</option>\';\n      }).join(\'\') + \'</select></label>\' +\n    \'</div>\';\n\n    var bothReviewed = before.moderator.status === "done" && after.moderator.status === "done";\n    var sameDesign = before.id === after.id;\n\n    if(sameDesign){\n      html += \'<p class="empty-state">Pick two different designs to compare.</p>\';\n    } else if(!bothReviewed){\n      html += \'<p class="empty-state">Review both designs first — upload each one so the panel can run — then the comparison will appear here as a numbered summary.</p>\';\n    } else if(state.compare.result.status === "idle"){\n      html += \'<div class="regen-row" style="justify-content:flex-start;margin-top:0;"><button type="button" id="genCompareBtn">Generate comparison</button></div>\';\n    } else if(state.compare.result.status === "loading"){\n      html +=\n        \'<span class="thinking-label">Comparing the two rounds of reviews…</span>\' +\n        \'<div class="skeleton-line" style="width:70%"></div>\' +\n        \'<div class="skeleton-line" style="width:90%"></div>\' +\n        \'<div class="skeleton-line" style="width:55%"></div>\';\n    } else if(state.compare.result.status === "error"){\n      html += \'<p class="state-error">\' + esc(state.compare.result.message) +\n        (state.compare.result.retryable ? \' <span class="retry-link" id="retryCompare" style="display:inline-block;margin-top:4px;">Try again</span>\' : \'\') +\n        \'</p>\';\n    } else if(state.compare.result.status === "done"){\n      var cd = state.compare.result.data;\n      if(state.compare.stale){\n        html += \'<div class="stale-banner">A review changed since this story was written.<button type="button" id="regenStaleCompareBtn">Regenerate</button></div>\';\n      }\n      var pts = [];\n      if(cd.verdictShift) pts.push({point: "Overall shift", detail: cd.verdictShift});\n      (cd.points || []).forEach(function(pt){ pts.push(pt); });\n      html += numListHtml(pts, function(pt){\n        if(!pt.type) return null;\n        if(pt.type === "improved") return {cls:"improved", label:"Improved"};\n        if(pt.type === "regressed") return {cls:"regressed", label:"Regressed"};\n        if(pt.type === "unchanged") return {cls:"unchanged", label:"Unchanged"};\n        return null;\n      });\n      if(cd.synthesis) html += \'<p class="num-closing">\' + esc(cd.synthesis) + \'</p>\';\n      html += \'<div class="regen-row"><button type="button" id="regenCompareBtn">Regenerate comparison</button></div>\';\n    }\n\n    $("contentCard").innerHTML = html;\n\n    var bSel = $("beforeSelect"), aSel = $("afterSelect");\n    if(bSel) bSel.addEventListener("change", function(){\n      state.compare.beforeId = bSel.value;\n      state.compare.result = {status:"idle"}; state.compare.stale = false;\n      renderCompareTab();\n    });\n    if(aSel) aSel.addEventListener("change", function(){\n      state.compare.afterId = aSel.value;\n      state.compare.result = {status:"idle"}; state.compare.stale = false;\n      renderCompareTab();\n    });\n    var genBtn = $("genCompareBtn"); if(genBtn) genBtn.addEventListener("click", runCompare);\n    var regenBtn = $("regenCompareBtn"); if(regenBtn) regenBtn.addEventListener("click", runCompare);\n    var regenStale = $("regenStaleCompareBtn"); if(regenStale) regenStale.addEventListener("click", runCompare);\n    var retryCompare = $("retryCompare"); if(retryCompare) retryCompare.addEventListener("click", function(){ runCompare(); });\n  }\n\n  function compareCard(d){\n    var chips = PERSONAS.map(function(p){\n      var r = d.results[p.key];\n      if(r.status !== "done") return \'<div class="compare-chip"><b>\' + p.initials + \'</b><span class="empty-state" style="padding:0;">Not reviewed</span></div>\';\n      var vm = VERDICT_META[r.data.verdict] || VERDICT_META["needs-work"];\n      return \'<div class="compare-chip"><b>\' + p.initials + \'</b><span class="verdict tiny \' + vm.cls + \'">\' + esc(vm.label) + \'</span></div>\';\n    }).join(\'\');\n    return (\n      \'<div class="compare-card">\' +\n        \'<img class="compare-thumb" src="\' + d.url + \'" alt="">\' +\n        \'<p class="compare-name">\' + esc(d.name) + \'</p>\' +\n        \'<div class="compare-chip-row">\' + chips + \'</div>\' +\n      \'</div>\'\n    );\n  }\n\n  async function runCompare(){\n    var before = getDesign(state.compare.beforeId), after = getDesign(state.compare.afterId);\n    if(!state.sample || !before || !after) return;\n    state.compare.result = {status:"loading"};\n    state.compare.stale = false;\n    renderCompareTab();\n\n    function describe(d, label){\n      var lines = [label.toUpperCase() + \' — "\' + d.name + \'" (moderator verdict: \' + d.moderator.data.verdict + \')\'];\n      PERSONAS.forEach(function(p){\n        var r = d.results[p.key];\n        if(r.status === "done"){\n          lines.push(p.role.toUpperCase() + " (" + r.data.verdict + "): " + r.data.headline + " — " + r.data.notes);\n        }\n      });\n      if(d.engineerRound2.status === "done"){\n        lines.push("ENGINEER, reacting to the PM (" + d.engineerRound2.data.stance + "): " + d.engineerRound2.data.reaction);\n      }\n      lines.push("MODERATOR SYNTHESIS: " + d.moderator.data.synthesis);\n      return lines.join("\\n");\n    }\n\n    var prompt =\n      "You are comparing two rounds of design-review panel feedback on two versions of the same product screen: a BEFORE version and an AFTER version. Here is the full panel feedback for each:\\n\\n" +\n      describe(before, "before") + "\\n\\n" + describe(after, "after") +\n      "\\n\\nCompare them and tell the before/after story: what specifically got better, what got worse, and what stayed a problem in both. Ground every point in what the reviewers actually said. " +\n      "Reply with ONLY a JSON object, no other text, matching exactly:\\n" +\n      \'{"verdictShift": "one short sentence naming the overall shift from before to after", \' +\n      \'"points": [{"type": "improved" | "regressed" | "unchanged", "point": "a short subtitle, under 8 words", "detail": "1-2 sentences explaining it, plain prose, referencing which reviewer(s) said so"}], \' +\n      \'"synthesis": "2-3 closing sentences of plain prose giving your overall take on whether the after version is ready, no lists, no markdown"}\\n\' +\n      "Include 3 to 6 items in points, mixing improved, regressed and unchanged where each genuinely applies.";\n\n    try{\n      var data = await state.sample.json(prompt, {modelTier:"default", cache:false});\n      state.compare.result = {status:"done", data: data};\n    }catch(err){\n      var m = mapError(err);\n      state.compare.result = {status:"error", message: m.message, retryable: m.retryable};\n    }\n    renderCompareTab();\n  }\n\n  function markCompareStale(designId){\n    if((state.compare.beforeId === designId || state.compare.afterId === designId) && state.compare.result.status === "done"){\n      state.compare.stale = true;\n    }\n  }\n\n  function render(){\n    var layout = document.querySelector(".layout");\n    if(layout) layout.classList.toggle("layout--empty", !state.designs.length);\n    syncCompareTab();\n    renderSidebar();\n    renderContent();\n  }\n\n  function numListHtml(items, tagFn){\n    return \'<div class="num-list">\' + (items||[]).map(function(pt, i){\n      var tag = "";\n      if(tagFn){\n        var meta = tagFn(pt);\n        if(meta) tag = \'<span class="num-tag \' + meta.cls + \'">\' + esc(meta.label) + \'</span>\';\n      }\n      return (\n        \'<div class="num-item">\' +\n          \'<p class="num-index">\' + String(i+1).padStart(2,"0") + \'.</p>\' +\n          \'<p class="num-subtitle">\' + tag + esc(pt.point || "") + \'</p>\' +\n          \'<p class="num-body">\' + esc(pt.detail || "") + \'</p>\' +\n        \'</div>\'\n      );\n    }).join(\'\') + \'</div>\';\n  }\n\n  // ---------- running the panel ----------\n  async function runOne(designId, key){\n    var d = getDesign(designId);\n    if(!state.sample || !d) return;\n    var persona = PERSONA_BY_KEY[key];\n    d.results[key] = {status:"loading"};\n    if(d.moderator.status === "done") d.summaryStale = true;\n    markCompareStale(designId);\n    render();\n    try{\n      var data = await state.sample.json(persona.prompt(), {\n        images: d.file,\n        modelTier: "default",\n        cache: false\n      });\n      d = getDesign(designId); if(!d) return;\n      d.results[key] = {status:"done", data: data};\n    }catch(err){\n      d = getDesign(designId); if(!d) return;\n      var m = mapError(err);\n      d.results[key] = {status:"error", message: m.message, retryable: m.retryable};\n    }\n    render();\n    if(key === "pm"){\n      await runEngineerRound2(designId);\n    }\n    maybeAutoModerate(designId);\n  }\n\n  async function runEngineerRound2(designId){\n    var d = getDesign(designId);\n    if(!state.sample || !d) return;\n    if(d.results.pm.status !== "done"){\n      d.engineerRound2 = {status:"skipped"};\n      render();\n      return;\n    }\n    d.engineerRound2 = {status:"loading"};\n    if(d.moderator.status === "done") d.summaryStale = true;\n    markCompareStale(designId);\n    render();\n    try{\n      var data = await state.sample.json(round2Prompt(d.results.pm.data), {\n        images: d.file,\n        modelTier: "default",\n        cache: false\n      });\n      d = getDesign(designId); if(!d) return;\n      d.engineerRound2 = {status:"done", data: data};\n    }catch(err){\n      d = getDesign(designId); if(!d) return;\n      var m = mapError(err);\n      d.engineerRound2 = {status:"error", message: m.message, retryable: m.retryable};\n    }\n    render();\n  }\n\n  function maybeAutoModerate(designId){\n    var d = getDesign(designId);\n    if(!d) return;\n    var settled = ["pm","eng","skeptic"].every(function(k){\n      return d.results[k].status === "done" || d.results[k].status === "error";\n    });\n    if(!settled) return;\n    if(d.engineerRound2.status === "loading") return;\n    var succeeded = ["pm","eng","skeptic"].filter(function(k){ return d.results[k].status === "done"; });\n    if(succeeded.length < 2){\n      d.moderator = {status:"error", message:"Too few reviews completed to write a summary.", retryable:false};\n      render();\n      return;\n    }\n    runModerator(designId);\n  }\n\n  async function runModerator(designId){\n    var d = getDesign(designId);\n    if(!state.sample || !d) return;\n    var succeeded = PERSONAS.filter(function(p){ return d.results[p.key].status === "done"; });\n    if(succeeded.length < 2){\n      d.moderator = {status:"error", message:"Too few reviews completed to write a summary.", retryable:false};\n      render();\n      return;\n    }\n    d.moderator = {status:"loading"};\n    d.summaryStale = false;\n    markCompareStale(designId);\n    render();\n\n    var missing = PERSONAS.filter(function(p){ return d.results[p.key].status !== "done"; })\n      .map(function(p){ return p.role; });\n\n    var body = succeeded.map(function(p){\n      var pd = d.results[p.key].data;\n      return p.role.toUpperCase() + " (verdict: " + pd.verdict + ") — " + pd.headline + "\\n" + pd.notes;\n    }).join("\\n\\n");\n\n    var round2Note = "";\n    if(d.engineerRound2.status === "done"){\n      var r2 = d.engineerRound2.data;\n      round2Note = "\\n\\nSECOND ROUND — the Engineer then read the Product Manager\'s critique above and reacted to it directly (stance: " +\n        r2.stance + "): " + r2.reaction;\n    }\n\n    var prompt =\n      "You are moderating a design review panel. Independent reviewers each critiqued the same UI design. Their reviews:\\n\\n" +\n      body +\n      round2Note +\n      (missing.length ? ("\\n\\n(The following reviewer\'s critique could not be generated and is not included: " + missing.join(", ") + ".)") : "") +\n      "\\n\\nRead all of the above, including the direct exchange between the Engineer and the Product Manager in the second round, and identify the specific places these reviewers agree with each other, and the specific places they disagree or trade off against each other. " +\n      "Reply with ONLY a JSON object, no other text, matching exactly:\\n" +\n      \'{"points": [{"type": "agreement" | "tension", "point": "a short subtitle, under 8 words", "detail": "1-2 sentences explaining it, plain prose"}], \' +\n      \'"synthesis": "2-3 closing sentences of plain prose giving your overall take, no lists, no markdown"}\\n\' +\n      "Include 3 to 6 items in points, mixing both agreement and tension types, ordered by how important each is.";\n\n    try{\n      var data = await state.sample.json(prompt, {modelTier:"default", cache:false});\n      d = getDesign(designId); if(!d) return;\n      d.moderator = {status:"done", data: data};\n    }catch(err){\n      d = getDesign(designId); if(!d) return;\n      var m = mapError(err);\n      d.moderator = {status:"error", message: m.message, retryable: m.retryable};\n    }\n    render();\n  }\n\n  async function submitCritique(designId){\n    var d = getDesign(designId);\n    if(!d || isBusy(d)) return;\n    if(!state.sample){\n      if(state.pendingReviewIds.indexOf(designId) === -1) state.pendingReviewIds.push(designId);\n      return;\n    }\n    d.results = {pm:{status:"loading"}, eng:{status:"loading"}, skeptic:{status:"loading"}};\n    d.engineerRound2 = {status:"idle"};\n    d.moderator = {status:"idle"};\n    d.summaryStale = false;\n    markCompareStale(designId);\n    if(state.activeId === designId) setTab("summary");\n    render();\n\n    await Promise.all(PERSONAS.map(function(p){\n      return (async function(){\n        try{\n          var data = await state.sample.json(p.prompt(), {\n            images: d.file,\n            modelTier: "default",\n            cache: false\n          });\n          var dd = getDesign(designId); if(!dd) return;\n          dd.results[p.key] = {status:"done", data: data};\n        }catch(err){\n          var dd2 = getDesign(designId); if(!dd2) return;\n          var m = mapError(err);\n          dd2.results[p.key] = {status:"error", message: m.message, retryable: m.retryable};\n        }\n        render();\n      })();\n    }));\n\n    if(getDesign(designId)) await runEngineerRound2(designId);\n    maybeAutoModerate(designId);\n    render();\n  }\n\n  // ---------- boot ----------\n  render();\n  initSample();\n})();';
-    host.appendChild(boot);
-
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap";
+    document.head.appendChild(link);
+    (async () => {
+      try {
+        s.sample = await connectClaude();
+      } catch {
+        s.sample = null;
+      }
+      if (!s.sample) {
+        s.banner = "This page can't reach Claude in this view, so the panel review is unavailable here. Open it as a Claude artifact (or on claude.ai) to run critiques.";
+        s.hint = "Unavailable in this view.";
+        refresh();
+        return;
+      }
+      try {
+        s.caps = await s.sample.limits();
+      } catch {
+        s.caps = defaultImageCaps();
+      }
+      if (!s.caps || !s.caps.images) s.caps = defaultImageCaps();
+      s.banner = "";
+      refresh();
+      const queued = s.pendingReviewIds.splice(0);
+      queued.forEach((id) => submitCritique(id));
+    })();
     return () => {
-      host.innerHTML = "";
+      s.designs.forEach((d) => URL.revokeObjectURL(d.url));
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const active = getActive();
+  if (s.sample && s.caps && s.caps.images && !s.hintError) {
+    if (!active) s.hint = "";
+    else if (isBusy(active)) s.hint = "Reviewing “" + active.name + "”…";
+    else s.hint = "";
+  }
+
+  let beforeId = s.compare.beforeId;
+  let afterId = s.compare.afterId;
+  if (s.designs.length >= 2) {
+    if (!getDesign(beforeId)) beforeId = s.designs[0].id;
+    if (!getDesign(afterId) || afterId === beforeId) {
+      const alt = s.designs.find((d) => d.id !== beforeId);
+      afterId = alt ? alt.id : s.designs[0].id;
+    }
+  }
+
+  function renderContent() {
+    if (s.activeTab === "summary") {
+      const d = active;
+      if (!d) {
+        return (
+          <>
+            <h2 className="panel-title">Moderator</h2>
+            <p className="empty-state">Upload a design on the left — the moderator's synthesis of all three reviewers will appear here once they're done.</p>
+          </>
+        );
+      }
+      const anyStarted = ["pm", "eng", "skeptic"].some((k) => d.results[k].status !== "idle");
+      if (!anyStarted && d.moderator.status === "idle") {
+        return (
+          <>
+            <h2 className="panel-title">Moderator</h2>
+            <p className="empty-state">No review yet for “{d.name}”. The moderator’s synthesis of all three reviewers will appear here once they’re done.</p>
+          </>
+        );
+      }
+      const anyPersonaDone = ["pm", "eng", "skeptic"].some((k) => d.results[k].status === "done");
+      if (
+        d.moderator.status === "idle" ||
+        d.moderator.status === "loading" ||
+        (d.moderator.status === "error" && d.moderator.retryable === false && !anyPersonaDone)
+      ) {
+        const rows = PERSONAS.map((p) => {
+          const r = d.results[p.key];
+          let status = "Waiting";
+          if (r.status === "loading") status = "Reviewing…";
+          if (r.status === "done") status = "Done";
+          if (r.status === "error") status = "Couldn't complete";
+          return (
+            <li key={p.key}>
+              <ProgressIcon status={r.status} />
+              <span className="prog-name">{p.name}</span>
+              <span className="prog-status">{status}</span>
+            </li>
+          );
+        });
+        const r2 = d.engineerRound2;
+        let r2Status = "Waiting";
+        if (r2.status === "loading") r2Status = "Reacting to the PM…";
+        if (r2.status === "done") r2Status = "Done";
+        if (r2.status === "error") r2Status = "Couldn't complete";
+        if (r2.status === "skipped") r2Status = "Skipped";
+        rows.push(
+          <li key="r2">
+            <ProgressIcon status={r2.status} />
+            <span className="prog-name">Engineer — round 2</span>
+            <span className="prog-status">{r2Status}</span>
+          </li>
+        );
+        rows.push(
+          <li key="mod">
+            <ProgressIcon status={d.moderator.status === "loading" ? "loading" : "idle"} />
+            <span className="prog-name">Moderator</span>
+            <span className="prog-status">{d.moderator.status === "loading" ? "Reading the panel…" : "Waiting on reviewers"}</span>
+          </li>
+        );
+        return (
+          <>
+            <h2 className="panel-title">Moderator</h2>
+            <ul className="progress-list">{rows}</ul>
+          </>
+        );
+      }
+      if (d.moderator.status === "error") {
+        return (
+          <>
+            <h2 className="panel-title">Moderator</h2>
+            <p className="state-error">
+              {d.moderator.message}
+              {d.moderator.retryable ? (
+                <span className="retry-link" style={{ display: "inline-block", marginTop: 4 }} onClick={() => runModerator(d.id)}>
+                  Try again
+                </span>
+              ) : null}
+            </p>
+          </>
+        );
+      }
+      const data = d.moderator.data;
+      return (
+        <>
+          <h2 className="panel-title">Moderator</h2>
+          {d.summaryStale ? (
+            <div className="stale-banner">
+              Reviews changed since this summary was written.
+              <button type="button" onClick={() => runModerator(d.id)}>
+                Regenerate
+              </button>
+            </div>
+          ) : null}
+          <NumList
+            items={data.points || []}
+            tagFn={(pt) => (pt.type === "tension" ? { cls: "tension", label: "Tension" } : { cls: "agreement", label: "Agreement" })}
+          />
+          <p className="num-closing">{data.synthesis}</p>
+          <div className="regen-row">
+            <button type="button" onClick={() => runModerator(d.id)}>
+              Regenerate
+            </button>
+          </div>
+        </>
+      );
+    }
+
+    if (s.activeTab === "compare") {
+      if (s.designs.length < 2) {
+        return (
+          <>
+            <h2 className="panel-title">Compare</h2>
+            <p className="empty-state">Upload a second design to compare it against another.</p>
+          </>
+        );
+      }
+      const before = getDesign(beforeId);
+      const after = getDesign(afterId);
+      const bothReviewed = before.moderator.status === "done" && after.moderator.status === "done";
+      const sameDesign = before.id === after.id;
+      let body = null;
+      if (sameDesign) body = <p className="empty-state">Pick two different designs to compare.</p>;
+      else if (!bothReviewed) {
+        body = <p className="empty-state">Review both designs first — upload each one so the panel can run — then the comparison will appear here as a numbered summary.</p>;
+      } else if (s.compare.result.status === "idle") {
+        body = (
+          <div className="regen-row" style={{ justifyContent: "flex-start", marginTop: 0 }}>
+            <button type="button" onClick={runCompare}>
+              Generate comparison
+            </button>
+          </div>
+        );
+      } else if (s.compare.result.status === "loading") {
+        body = (
+          <>
+            <span className="thinking-label">Comparing the two rounds of reviews…</span>
+            <div className="skeleton-line" style={{ width: "70%" }} />
+            <div className="skeleton-line" style={{ width: "90%" }} />
+            <div className="skeleton-line" style={{ width: "55%" }} />
+          </>
+        );
+      } else if (s.compare.result.status === "error") {
+        body = (
+          <p className="state-error">
+            {s.compare.result.message}
+            {s.compare.result.retryable ? (
+              <span className="retry-link" style={{ display: "inline-block", marginTop: 4 }} onClick={runCompare}>
+                Try again
+              </span>
+            ) : null}
+          </p>
+        );
+      } else if (s.compare.result.status === "done") {
+        const cd = s.compare.result.data;
+        const pts = [];
+        if (cd.verdictShift) pts.push({ point: "Overall shift", detail: cd.verdictShift });
+        (cd.points || []).forEach((pt) => pts.push(pt));
+        body = (
+          <>
+            {s.compare.stale ? (
+              <div className="stale-banner">
+                A review changed since this story was written.
+                <button type="button" onClick={runCompare}>
+                  Regenerate
+                </button>
+              </div>
+            ) : null}
+            <NumList
+              items={pts}
+              tagFn={(pt) => {
+                if (!pt.type) return null;
+                if (pt.type === "improved") return { cls: "improved", label: "Improved" };
+                if (pt.type === "regressed") return { cls: "regressed", label: "Regressed" };
+                if (pt.type === "unchanged") return { cls: "unchanged", label: "Unchanged" };
+                return null;
+              }}
+            />
+            {cd.synthesis ? <p className="num-closing">{cd.synthesis}</p> : null}
+            <div className="regen-row">
+              <button type="button" onClick={runCompare}>
+                Regenerate comparison
+              </button>
+            </div>
+          </>
+        );
+      }
+      return (
+        <>
+          <h2 className="panel-title">Compare</h2>
+          <div className="compare-pickers">
+            <label className="pts-label">
+              Before
+              <select
+                value={beforeId}
+                onChange={(e) => {
+                  s.compare.beforeId = e.target.value;
+                  s.compare.result = { status: "idle" };
+                  s.compare.stale = false;
+                  refresh();
+                }}
+              >
+                {s.designs.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="pts-label">
+              After
+              <select
+                value={afterId}
+                onChange={(e) => {
+                  s.compare.afterId = e.target.value;
+                  s.compare.result = { status: "idle" };
+                  s.compare.stale = false;
+                  refresh();
+                }}
+              >
+                {s.designs.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          {body}
+        </>
+      );
+    }
+
+    const key = s.activeTab;
+    const p = PERSONA_BY_KEY[key];
+    const d = active;
+    if (!d) {
+      return (
+        <>
+          <h2 className="panel-title">{p.role}</h2>
+          <p className="empty-state">Upload a design on the left to hear from {p.name}.</p>
+        </>
+      );
+    }
+    const r = d.results[key];
+    let body;
+    if (r.status === "idle") {
+      body = (
+        <p className="empty-state">
+          No review yet for “{d.name}”. Upload starts the critique — {p.name}’s notes will appear here.
+        </p>
+      );
+    } else if (r.status === "loading" || (key === "eng" && d.engineerRound2.status === "loading")) {
+      body = <Skeleton />;
+    } else if (r.status === "error") {
+      body = (
+        <p className="state-error">
+          {r.message}
+          {r.retryable ? (
+            <span className="retry-link" style={{ display: "inline-block", marginTop: 4 }} onClick={() => runOne(d.id, key)}>
+              Try again
+            </span>
+          ) : null}
+        </p>
+      );
+    } else {
+      body = (
+        <>
+          <NumList items={personaPoints(key, d)} />
+          {d.engineerRound2.status === "error" && key === "eng" ? (
+            <p className="state-error" style={{ marginTop: 18 }}>
+              {d.engineerRound2.message}
+              {d.engineerRound2.retryable ? (
+                <span className="retry-link" style={{ display: "inline-block", marginTop: 4 }} onClick={() => runEngineerRound2(d.id).then(() => maybeAutoModerate(d.id))}>
+                  Try again
+                </span>
+              ) : null}
+            </p>
+          ) : null}
+          <div className="regen-row">
+            <button type="button" onClick={() => runOne(d.id, key)}>
+              Regenerate
+            </button>
+          </div>
+        </>
+      );
+    }
+    return (
+      <>
+        <h2 className="panel-title">{p.role}</h2>
+        {body}
+      </>
+    );
+  }
+
+  const accept = s.caps && s.caps.images && s.caps.images.mediaTypes ? s.caps.images.mediaTypes.join(",") : "image/*";
+
   return (
-    <div
-      ref={hostRef}
-      className="crit-room-jsx"
-      data-claude-artifact-capabilities='{"sample":{}}'
-    />
+    <div className="crit-room" data-claude-artifact-capabilities='{"sample":{}}'>
+      <style>{STYLES}</style>
+      <div className="page">
+        <header style={{ marginBottom: 0 }}>{s.banner ? <div className="banner">{s.banner}</div> : null}</header>
+        <div className={"layout" + (s.designs.length ? "" : " layout--empty")}>
+          <div className="left-col">
+            <div>
+              <h1>
+                AI Design
+                <br />
+                Critique Panel
+              </h1>
+            </div>
+            <div className="upload-card">
+              <div className="upload-card-inner">
+                <div className="upload-head">
+                  <p className="upload-title">Upload a design</p>
+                  <p className="upload-sub">Drag and drop your design here or click to browse</p>
+                </div>
+                <div
+                  className={"dropzone" + (s.drag ? " drag" : "")}
+                  tabIndex={0}
+                  role="button"
+                  aria-label="Upload design images to review"
+                  onClick={() => fileRef.current && fileRef.current.click()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      fileRef.current && fileRef.current.click();
+                    }
+                  }}
+                  onDragEnter={(e) => {
+                    e.preventDefault();
+                    s.drag = true;
+                    refresh();
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    s.drag = true;
+                    refresh();
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    s.drag = false;
+                    refresh();
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    s.drag = false;
+                    refresh();
+                    if (e.dataTransfer.files && e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+                  }}
+                >
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept={accept}
+                    multiple
+                    hidden
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length) addFiles(e.target.files);
+                      e.target.value = "";
+                    }}
+                  />
+                  <div className="dz-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 15V5" />
+                      <path d="M8 9l4-4 4 4" />
+                      <path d="M5 19h14" />
+                    </svg>
+                  </div>
+                  <p className="dz-line1">Drag and drop here</p>
+                  <p className="dz-line2">
+                    or
+                    <br />
+                    <span className="dz-browse">Browse file to upload</span>
+                  </p>
+                </div>
+                <p className={"hint" + (s.hintError ? " error" : "")}>{s.hint || "Upload a design to begin."}</p>
+              </div>
+              {s.designs.length ? (
+                <div className="design-list">
+                  {s.designs.map((d) => (
+                    <div
+                      key={d.id}
+                      className={"design-row" + (d.id === s.activeId ? " active" : "")}
+                      onClick={() => {
+                        s.activeId = d.id;
+                        refresh();
+                      }}
+                    >
+                      <img className="design-thumb" src={d.url} alt="" />
+                      <div className="design-meta">
+                        <p className="design-name">{d.name}</p>
+                        <p className="design-sub">{Math.max(1, Math.round(d.size / 1024))} kb</p>
+                      </div>
+                      <button
+                        type="button"
+                        className="design-remove"
+                        title="Remove this design"
+                        aria-label={"Remove " + d.name}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeDesign(d.id);
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
+          <div className="right-col">
+            <nav className="tabs" role="tablist">
+              {TABS.map((tab) => {
+                if (tab.id === "compare" && s.designs.length < 2) return null;
+                const on = s.activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    className={"tab" + (on ? " active" : "")}
+                    role="tab"
+                    aria-selected={on}
+                    onClick={() => setTab(tab.id)}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </nav>
+            <div className="content-card">{renderContent()}</div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
