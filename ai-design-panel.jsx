@@ -81,12 +81,15 @@ const STYLES = `  :root{
     margin:0 auto;
     padding:56px 48px 80px;
     min-height: 100dvh;
+    display:flex;
+    flex-direction:column;
   }
   @media (max-width:720px){
     .page{padding:32px 20px 56px;}
   }
 
   .layout{
+    flex:1;
     display:grid;
     grid-template-columns:minmax(280px,360px) 1fr;
     grid-template-rows:auto 1fr;
@@ -98,7 +101,7 @@ const STYLES = `  :root{
     grid-template-columns:minmax(280px,360px);
   }
   @media (max-width:960px){
-    .layout, .layout.layout--empty{grid-template-columns:1fr; column-gap:0; row-gap:24px;}
+    .layout, .layout.layout--empty{grid-template-columns:1fr; grid-template-rows:auto; column-gap:0; row-gap:24px;}
     .tabs-slot{justify-self:start !important;}
   }
 
@@ -118,20 +121,22 @@ const STYLES = `  :root{
   }
 
   /* ---------- Upload card (also the dropzone) ---------- */
-  .upload-card{
+.upload-card{
     background:var(--surface-2);
     border-radius:20px;
     box-shadow:var(--shadow);
     padding:22px;
     display:flex;
     flex-direction:column;
-    min-height:640px;
+    align-self:stretch;
+    min-height:480px;
     cursor:pointer;
     transition:background .15s ease;
   }
+  .right-content{align-self:stretch;}
   .upload-card.drag{background:var(--accent-tint);}
   @media (max-width:960px){
-    .upload-card{min-height:420px;}
+    .upload-card{align-self:auto; min-height:420px;}
   }
 
   .hint{
