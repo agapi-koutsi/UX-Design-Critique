@@ -1051,7 +1051,7 @@ export default function App() {
           return (
             <li key={p.key}>
               <ProgressIcon status={r.status} />
-              <span className="prog-name">{p.name}</span>
+              <span className="prog-name">{p.role}</span>
               <span className="prog-status">{status}</span>
             </li>
           );
